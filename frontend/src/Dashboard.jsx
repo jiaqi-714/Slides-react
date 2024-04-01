@@ -1,7 +1,11 @@
+//Dashboard.jsx
 import React, { useState } from 'react';
 import { Box, Grid, Card, CardContent, CardMedia, Typography, Button, Modal, TextField, Fab } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add'; // Ensure this is imported for the FAB icon
 import { NavBar } from './NavBar';
+import { useNavigate } from 'react-router-dom';
+import { usePresentations } from './PresentationContext'; // Ensure correct path
+
 
 // Modal style
 const style = {
@@ -17,29 +21,25 @@ const style = {
 };
 
 export const Dashboard = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [presentations, setPresentations] = useState([
-    // Example presentation data
-    { id: 1, name: 'Presentation 1', thumbnail: '', description: 'A cool presentation', slides: [1, 2] },
-    // Add more presentations as needed for demonstration
-  ]);
   const [newPresentationName, setNewPresentationName] = useState('');
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleCreatePresentation = () => {
-    // Example logic to add a new presentation
-    const newPresentation = {
-      id: presentations.length + 1,
+  // Use the PresentationContext
+  const { presentations, addPresentation } = usePresentations();
+
+  const handleCreatePresentation = async () => {
+    // Adapt this logic to match your context's method signature
+    await addPresentation({
       name: newPresentationName,
-      thumbnail: '', // Placeholder for thumbnail path
-      description: '', // Placeholder for presentation description
-      slides: [{}], // Placeholder for initial slide
-    };
-    setPresentations([...presentations, newPresentation]);
-    setNewPresentationName(''); // Reset the input field after adding
-    handleClose(); // Close the modal after creation
+      description: "wait for input..."
+      // Include other necessary presentation details
+    });
+    setNewPresentationName('');
+    handleClose();
   };
 
   return (
@@ -48,13 +48,19 @@ export const Dashboard = () => {
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <Grid container spacing={2}>
           {presentations.map((presentation) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={presentation.id}>
+            <Grid item xs={12} sm={8} md={6} lg={4} key={presentation.id} onClick={() => navigate(`/presentation/${presentation.id}`)}>
               <Card sx={{ 
                 width: 300, // Fixed width
                 height: 150, // Height is half of width, maintaining a 2:1 ratio
                 display: 'flex', 
                 flexDirection: 'column', 
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                transition: '0.3s', // Smooth transition for hover effects
+                '&:hover': {
+                  bgcolor: 'background.default', // Change background color on hover
+                  transform: 'scale(1.05)', // Slightly scale the card
+                  boxShadow: '0 6px 12px rgba(0,0,0,0.2)', // Add shadow for depth
+                }
               }}>
                 {/* Conditional rendering for the thumbnail */}
                 {presentation.thumbnail ? (
@@ -78,7 +84,7 @@ export const Dashboard = () => {
                     </Typography>
                   )}
                   <Typography variant="body2" color="text.secondary">
-                    Slides: {presentation.slides.length}
+                    Slides: {presentation.slides}
                   </Typography>
                 </CardContent>
               </Card>

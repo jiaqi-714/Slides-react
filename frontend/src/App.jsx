@@ -1,39 +1,60 @@
 //App.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Login, onLogin} from './Login';
+import { Login, onLogin, LoginNav} from './Login';
 import { Register, onRegister } from './Register';
-import { LoginNav } from './LoginNav';
+// import { LoginNav } from './LoginNav';
 import { Dashboard } from './Dashboard';
 import { AuthProvider } from './AuthContext'; // Import the AuthProvider
 import CenteredLayout from './CenteredLayout'; // Import the layout component
+import { EditPresentation } from './EditPresentation'; // Import the edit component
+import ProtectedRoute from './ProtectedRoute'; // Import ProtectedRoute
+import { PresentationProvider } from './PresentationContext'; // Adjust the path as necessary
+import { NavBar } from './NavBar';
+
+const shouldRenderNavBar = (path) => {
+  const excludedPaths = ['/', '/login', '/register'];
+  return !excludedPaths.includes(path);
+};
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={
-            <CenteredLayout>
-              <Login onLogin={onLogin}/>
-              <LoginNav />
-            </CenteredLayout>
-          } />
-          <Route path="/register" element={
-            <CenteredLayout>
-              <Register onRegister={onRegister}/>
-              <LoginNav />
-            </CenteredLayout>
-          } />
-          <Route path="/login" element={
-            <CenteredLayout>
-              <Login onLogin={onLogin}/>
-              <LoginNav />
-            </CenteredLayout>
-          } />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </Router>
+      <PresentationProvider>
+        <Router>
+          {/* {shouldRenderNavBar(window.location.pathname) && <NavBar />} */}
+          <Routes>
+            <Route path="/" element={
+              <CenteredLayout>
+                <Login onLogin={onLogin}/>
+                <LoginNav />
+              </CenteredLayout>
+            } />
+            <Route path="/register" element={
+              <CenteredLayout>
+                <Register onRegister={onRegister}/>
+                <LoginNav />
+              </CenteredLayout>
+            } />
+            <Route path="/login" element={
+              <CenteredLayout>
+                <Login onLogin={onLogin}/>
+                <LoginNav />
+              </CenteredLayout>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/presentation/:presentationId" element={
+              <ProtectedRoute>
+                <EditPresentation />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Router>
+      </PresentationProvider>
     </AuthProvider>
   );
 }

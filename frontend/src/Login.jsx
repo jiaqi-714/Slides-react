@@ -1,8 +1,8 @@
 //Login.jsx
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
 import config from './config.json';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link} from 'react-router-dom';
 import { useAuth } from './AuthContext'; // Make sure the path is correct
 
 export const Login = ({ onLogin }) => {
@@ -11,7 +11,14 @@ export const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const { login } = useAuth(); // Destructure to get login function from the context
+  const { login, isAuthenticated } = useAuth(); // Destructure to get login function from the context
+
+  //jump to dashborad if user is isAuthenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +91,7 @@ export const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessa
       },
       body: JSON.stringify({ email, password }),
     });
+
     if (!response.ok) {
       const errorResponse = await response.json(); 
       console.log(errorResponse)
@@ -91,8 +99,9 @@ export const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessa
       throw new Error(errorMessage);
     }
     const { token } = await response.json();
+    console.log(token)
     localStorage.setItem('token', token);
-    login(); // Update the AuthContext state
+    login(token); // Update the AuthContext state
     navigate('/dashboard'); // Redirect to Dashboard
   } catch (error) {
     console.error(error);
@@ -100,3 +109,24 @@ export const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessa
     setOpenSnackbar(true);
   }
 };
+
+export function LoginNav () {
+  const { isAuthenticated } = useAuth(); // Use the hook to get the auth status
+  const location = useLocation();
+  console.log(isAuthenticated)
+  if (isAuthenticated) return null;
+
+  return (
+    <div>
+      {location.pathname === '/register' ? (
+        <p>
+          Already have an account? <Link to="/login" style={{ color: 'blue' }}>Login here.</Link>
+        </p>
+      ) : (
+        <p>
+          Haven&apos;t registered yet? <Link to="/register" style={{ color: 'blue' }}>Register here.</Link>
+        </p>
+      )}
+    </div>
+  );
+}
