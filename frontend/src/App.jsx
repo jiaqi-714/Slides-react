@@ -10,19 +10,12 @@ import CenteredLayout from './CenteredLayout'; // Import the layout component
 import { EditPresentation } from './EditPresentation'; // Import the edit component
 import ProtectedRoute from './ProtectedRoute'; // Import ProtectedRoute
 import { PresentationProvider } from './PresentationContext'; // Adjust the path as necessary
-import { NavBar } from './NavBar';
-
-const shouldRenderNavBar = (path) => {
-  const excludedPaths = ['/', '/login', '/register'];
-  return !excludedPaths.includes(path);
-};
 
 function App() {
   return (
     <AuthProvider>
       <PresentationProvider>
         <Router>
-          {/* {shouldRenderNavBar(window.location.pathname) && <NavBar />} */}
           <Routes>
             <Route path="/" element={
               <CenteredLayout>

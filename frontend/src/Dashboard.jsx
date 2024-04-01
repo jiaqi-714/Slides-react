@@ -6,7 +6,6 @@ import { NavBar } from './NavBar';
 import { useNavigate } from 'react-router-dom';
 import { usePresentations } from './PresentationContext'; // Ensure correct path
 
-
 // Modal style
 const style = {
   position: 'absolute',

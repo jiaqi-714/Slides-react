@@ -99,7 +99,6 @@ export const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessa
       throw new Error(errorMessage);
     }
     const { token } = await response.json();
-    console.log(token)
     localStorage.setItem('token', token);
     login(token); // Update the AuthContext state
     navigate('/dashboard'); // Redirect to Dashboard
