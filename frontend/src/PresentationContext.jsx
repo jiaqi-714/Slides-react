@@ -1,7 +1,7 @@
 // PresentationContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import config from './config.json';
-// import { useAuth } from './AuthContext';
+import { useAuth } from './AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 
 const PresentationContext = createContext();
@@ -13,7 +13,7 @@ const backendURL = `http://localhost:${config.BACKEND_PORT}/store`; // Use the p
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
 
-  // const { isAuthenticated } = useAuth(); // Destructure to get login function from the context
+  const { isAuthenticated } = useAuth(); // Destructure to get login function from the context
 
   useEffect(() => {
     const fetchPresentations = async () => {
@@ -25,7 +25,8 @@ export const PresentationProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched presentations:", data.store);
-          const { presentations } = data.store.store;
+          const presentations = data.store.store.presentations; 
+          console.log("presentations:", presentations);
           const presentationsArray = presentations || [];
           setPresentations(presentationsArray);
         }
@@ -71,8 +72,25 @@ export const PresentationProvider = ({ children }) => {
     });
   };
 
+  const updatePresentationTitle = async (presentationId, newTitle) => {
+    const updatedPresentations = presentations.map(presentation => 
+      presentation.id === presentationId ? { ...presentation, name: newTitle } : presentation
+    );
+    setPresentations(updatedPresentations);
+    
+    // Update the store
+    await fetch(backendURL, {
+      method: 'PUT',
+      headers: { 
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ store: { presentations: updatedPresentations } }),
+    });
+  };
+  
   return (
-    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation }}>
+    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation, updatePresentationTitle }}>
       {children}
     </PresentationContext.Provider>
   );

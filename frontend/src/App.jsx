@@ -3,13 +3,14 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Login, onLogin, LoginNav} from './Login';
 import { Register, onRegister } from './Register';
-// import { LoginNav } from './LoginNav';
 import { Dashboard } from './Dashboard';
 import { AuthProvider } from './AuthContext'; // Import the AuthProvider
 import CenteredLayout from './CenteredLayout'; // Import the layout component
 import { EditPresentation } from './EditPresentation'; // Import the edit component
 import ProtectedRoute from './ProtectedRoute'; // Import ProtectedRoute
 import { PresentationProvider } from './PresentationContext'; // Adjust the path as necessary
+import MainLayout from './MainLayout'
+import { NavBar } from './NavBar';
 
 function App() {
   return (
@@ -37,12 +38,16 @@ function App() {
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <MainLayout NavBarComponent={NavBar}>
+                  <Dashboard />
+                </MainLayout>
               </ProtectedRoute>
             } />
             <Route path="/presentation/:presentationId" element={
               <ProtectedRoute>
-                <EditPresentation />
+                <MainLayout NavBarComponent={NavBar}>
+                  <EditPresentation />
+                </MainLayout>
               </ProtectedRoute>
             } />
           </Routes>
