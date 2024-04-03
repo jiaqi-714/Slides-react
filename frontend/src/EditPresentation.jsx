@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Box, Typography, Modal, TextField } from '@mui/material';
+import { Button, Box, Typography, Modal, TextField, IconButton } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'; // Icon for adding slides
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'; // Icon for previous slide
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'; // Icon for next slide
+import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext'; // Ensure correct path
 
 export const EditPresentation = () => {
-  const { presentationId } = useParams(); // Get the presentation ID from the URL
+  const { presentationId } = useParams();
   const navigate = useNavigate();
   const [editTitleOpen, setEditTitleOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0); // New state for tracking current slide
 
   // Use the PresentationContext
-  const { presentations, deletePresentation, updatePresentationTitle } = usePresentations();
+  const { presentations, deletePresentation, updatePresentationTitle, addSlideToPresentation, deleteSlide } = usePresentations();
 
   const presentation = presentations.find(p => p.id === presentationId);
+  const slides = presentation?.slides || [];
+  
+  useEffect(() => {
+    setNewTitle(presentation?.name || '');
+    setCurrentSlideIndex(0); // Reset current slide index when presentation changes
+  }, [presentation]);
 
   const handleDelete = async () => {
     const isConfirmed = window.confirm("Are you sure?");
     if (isConfirmed) {
-      await deletePresentation(presentationId); // Directly use presentationId
-      navigate('/dashboard'); // Navigate back to the dashboard after deletion
+      await deletePresentation(presentationId);
+      navigate('/dashboard');
     }
   };
 
   const handleEditTitleOpen = () => {
-    setNewTitle(presentation?.name || '');
     setEditTitleOpen(true);
   };
   
@@ -32,28 +42,27 @@ export const EditPresentation = () => {
     setEditTitleOpen(false);
   };
 
-  // Function to navigate back to the dashboard
   const handleBack = () => {
     navigate('/dashboard');
   };
 
-  // Use `addSlideToPresentation` and `updatePresentationSlides` from the context
-  const { addSlideToPresentation, updatePresentationSlides } = usePresentations();
-
-  // State to track current slide index
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
-  const handleAddSlide = () => {
-    addSlideToPresentation(presentationId);
+  const handleAddSlide = async () => {
+    console.log("addslide")
+    await addSlideToPresentation(presentationId);
   };
 
-  // Move to the next or previous slide
-  const moveToSlide = (direction) => {
-    let newIndex = currentSlideIndex + direction;
-    setCurrentSlideIndex(newIndex);
+  const handleMoveSlide = (direction) => {
+    const newIndex = currentSlideIndex + direction;
+    if (newIndex >= 0 && newIndex < slides.length) {
+      setCurrentSlideIndex(newIndex);
+    }
   };
 
-  
+  const handleDeleteSlide = async (slideId) => {
+    // Call deleteSlide method from context
+    await deleteSlide(presentationId, slideId);
+  };
+
   if (!presentation) {
     return <Typography>Presentation not found</Typography>;
   }
@@ -65,6 +74,37 @@ export const EditPresentation = () => {
       <Button onClick={handleEditTitleOpen}>Edit Title</Button>
       <Button variant="outlined" color="error" onClick={handleDelete}>Delete Presentation</Button>
       
+      {/* Adjusted to only display the current slide */}
+      {slides.length > 0 && (
+        <Box sx={{ position: 'relative', width: '100%', height: '100%', p: 2 }}>
+          {/* Slide content here */}
+          <Typography>{slides[currentSlideIndex].content}</Typography>
+          
+        </Box>
+      )}
+      
+      {/* Updated Slide navigation and creation buttons */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
+        <IconButton onClick={() => handleMoveSlide(-1)} disabled={currentSlideIndex === 0}>
+          <ArrowBackIosNewIcon />
+        </IconButton>
+        <IconButton onClick={() => handleMoveSlide(1)} disabled={currentSlideIndex >= slides.length - 1}>
+          <ArrowForwardIosIcon />
+        </IconButton>
+        <IconButton onClick={handleAddSlide}>
+          <AddCircleOutlineIcon />
+        </IconButton>
+        {slides.length > 0 && ( // Only show the delete button if there are more than one slide
+          <IconButton onClick={() => handleDeleteSlide(slides[currentSlideIndex].id)} color="error">
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </Box>
+
+      {/* Displaying current slide index */}
+      <Typography>Slide {currentSlideIndex + 1} of {slides.length}</Typography>
+
+      {/* Modal for title editing */}
       <Modal
         open={editTitleOpen}
         onClose={() => setEditTitleOpen(false)}
@@ -83,8 +123,8 @@ export const EditPresentation = () => {
           borderRadius: 2,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2, // Creates consistent spacing between elements
-          minWidth: 300, // Ensures the modal is not too narrow
+          gap: 2,
+          minWidth: 300,
         }}>
           <Typography id="edit-title-modal" variant="h6" component="h2">
             Edit Title
@@ -97,8 +137,8 @@ export const EditPresentation = () => {
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             sx={{
-              '.MuiInputBase-root': { // Targets the input field for styling
-                borderRadius: '4px', // Softens the corners
+              '.MuiInputBase-root': {
+                borderRadius: '4px',
               }
             }}
           />
@@ -107,15 +147,15 @@ export const EditPresentation = () => {
             variant="contained" 
             color="primary" 
             sx={{
-              ':hover': { // Enhances the button's hover effect
+              ':hover': {
                 backgroundColor: 'primary.dark',
               }
-            }}>
+            }}
+          >
             Update
           </Button>
         </Box>
       </Modal>
-
     </Box>
   );
 };

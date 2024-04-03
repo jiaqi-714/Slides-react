@@ -62,13 +62,15 @@ export const PresentationProvider = ({ children }) => {
   const addSlideToPresentation = async (presentationId) => {
     let updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
+        // Initialize slides as an empty array if it doesn't exist
+        const existingSlides = Array.isArray(presentation.slides) ? presentation.slides : [];
         // Create a new slide object. Customize as needed.
         const newSlide = { id: uuidv4(), content: 'New slide' };
-        return { ...presentation, slides: [...presentation.slides, newSlide] };
+        return { ...presentation, slides: [...existingSlides, newSlide] };
       }
       return presentation;
     });
-
+  
     // Update state and backend
     await updateStore(updatedPresentations);
   };
@@ -95,8 +97,23 @@ export const PresentationProvider = ({ children }) => {
     });
   };
 
+  const deleteSlide = async (presentationId, slideId) => {
+    // Find the presentation and remove the slide
+    const updatedPresentations = presentations.map(presentation => {
+      if (presentation.id === presentationId) {
+        // Filter out the slide to be deleted
+        const updatedSlides = presentation.slides.filter(slide => slide.id !== slideId);
+        return { ...presentation, slides: updatedSlides };
+      }
+      return presentation;
+    });
+  
+    // Update state and backend
+    await updateStore(updatedPresentations);
+  };
+
   return (
-    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation, updatePresentationTitle, addSlideToPresentation, updatePresentationSlides}}>
+    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation, updatePresentationTitle, addSlideToPresentation, updatePresentationSlides, deleteSlide }}>
       {children}
     </PresentationContext.Provider>
   );

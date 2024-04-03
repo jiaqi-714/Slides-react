@@ -83,7 +83,7 @@ export const Dashboard = () => {
                   </Typography>
                 )}
                 <Typography variant="body2" color="text.secondary">
-                  Slides: {presentation.slides}
+                  Slides: {presentation.slides ? presentation.slides.length : 0}
                 </Typography>
               </CardContent>
             </Card>
