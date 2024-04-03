@@ -44,24 +44,47 @@ export const PresentationProvider = ({ children }) => {
     };
   
     const updatedPresentations = [...presentations, presentationWithId];
-    setPresentations(updatedPresentations);
-  
-    // Update the store with presentations nested under "presentations"
-    await fetch(backendURL, {
-      method: 'PUT',
-      headers: { 
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ store: { presentations: updatedPresentations } }),
-    });
+    await updateStore(updatedPresentations);
   };
   
   const deletePresentation = async (presentationId) => {
     const updatedPresentations = presentations.filter(p => p.id !== presentationId);
+    await updateStore(updatedPresentations);
+  };
+
+  const updatePresentationTitle = async (presentationId, newTitle) => {
+    const updatedPresentations = presentations.map(presentation => 
+      presentation.id === presentationId ? { ...presentation, name: newTitle } : presentation
+    );
+    await updateStore(updatedPresentations);
+  };
+
+  const addSlideToPresentation = async (presentationId) => {
+    let updatedPresentations = presentations.map(presentation => {
+      if (presentation.id === presentationId) {
+        // Create a new slide object. Customize as needed.
+        const newSlide = { id: uuidv4(), content: 'New slide' };
+        return { ...presentation, slides: [...presentation.slides, newSlide] };
+      }
+      return presentation;
+    });
+
+    // Update state and backend
+    await updateStore(updatedPresentations);
+  };
+
+  const updatePresentationSlides = async (presentationId, slides) => {
+    let updatedPresentations = presentations.map(presentation => 
+      presentation.id === presentationId ? { ...presentation, slides } : presentation
+    );
+
+    // Update state and backend
+    await updateStore(updatedPresentations);
+  };
+
+  // Helper function to update presentations in both state and backend
+  const updateStore = async (updatedPresentations) => {
     setPresentations(updatedPresentations);
-  
-    // Update the store with presentations nested under "presentations"
     await fetch(backendURL, {
       method: 'PUT',
       headers: { 
@@ -72,25 +95,8 @@ export const PresentationProvider = ({ children }) => {
     });
   };
 
-  const updatePresentationTitle = async (presentationId, newTitle) => {
-    const updatedPresentations = presentations.map(presentation => 
-      presentation.id === presentationId ? { ...presentation, name: newTitle } : presentation
-    );
-    setPresentations(updatedPresentations);
-    
-    // Update the store
-    await fetch(backendURL, {
-      method: 'PUT',
-      headers: { 
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ store: { presentations: updatedPresentations } }),
-    });
-  };
-  
   return (
-    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation, updatePresentationTitle }}>
+    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation, updatePresentationTitle, addSlideToPresentation, updatePresentationSlides}}>
       {children}
     </PresentationContext.Provider>
   );

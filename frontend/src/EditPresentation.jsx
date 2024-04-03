@@ -37,6 +37,23 @@ export const EditPresentation = () => {
     navigate('/dashboard');
   };
 
+  // Use `addSlideToPresentation` and `updatePresentationSlides` from the context
+  const { addSlideToPresentation, updatePresentationSlides } = usePresentations();
+
+  // State to track current slide index
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  const handleAddSlide = () => {
+    addSlideToPresentation(presentationId);
+  };
+
+  // Move to the next or previous slide
+  const moveToSlide = (direction) => {
+    let newIndex = currentSlideIndex + direction;
+    setCurrentSlideIndex(newIndex);
+  };
+
+  
   if (!presentation) {
     return <Typography>Presentation not found</Typography>;
   }
