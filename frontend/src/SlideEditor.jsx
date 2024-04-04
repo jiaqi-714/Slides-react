@@ -8,6 +8,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 
+const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
+const deckHeight = 700; // Assuming fixed height for now
+
 const SlideEditor = ({ presentationId }) => {
   const {
     presentations,
@@ -53,17 +56,31 @@ const SlideEditor = ({ presentationId }) => {
     return sortedContent.map((contentItem, index) => {
       // Placeholder function for image load to adjust its container size
       const handleImageLoad = (event) => {
-        const imageSizeRatio = contentItem.properties.imageSize / 100; // Convert percentage to a ratio
+        const imageSizeRatio = contentItem.properties.size / 100; // Convert percentage to a ratio
         const naturalWidth = event.target.naturalWidth;
         const naturalHeight = event.target.naturalHeight;
-        const displayedWidth = naturalWidth * imageSizeRatio;
-        const displayedHeight = naturalHeight * imageSizeRatio;
+        const deckRatio = deckWidth / naturalWidth;
+        const displayedWidth = naturalWidth * imageSizeRatio * deckRatio;
+        const displayedHeight = naturalHeight * imageSizeRatio * deckRatio;
         // Here, you might want to dynamically adjust the container or just use these for setting the image style
         event.target.style.width = `${displayedWidth}px`;
         event.target.style.height = `${displayedHeight}px`;
         console.log(event.target.style.width, event.target.style.height)
       };
   
+      const handleVideoLoad = (event) => {
+        // Calculate the desired video width as a percentage of the slide deck width
+        const desiredWidth = deckWidth * contentItem.properties.size / 100;
+      
+        // Maintain a 16:9 aspect ratio for the video
+        const aspectRatio = 16 / 9;
+        const desiredHeight = desiredWidth / aspectRatio;
+      
+        // Set the iframe size
+        event.target.style.width = `${desiredWidth}px`;
+        event.target.style.height = `${desiredHeight}px`;
+      };
+
       // Adjust border and padding for image content
       let boxStyles = {
         position: 'absolute',
@@ -89,15 +106,15 @@ const SlideEditor = ({ presentationId }) => {
       let contentStyles = {};
       if (contentItem.type === 'IMAGE') {
         contentStyles = {
-          width: `${contentItem.properties.imageSize}%`,
-          height: 'auto',
+          // width: `${contentItem.properties.size}%`,
+          // height: 'auto',
           display: 'block',
         };
       } else if (contentItem.type === 'VIDEO') {
         contentStyles = {
-          width: `100%`,
-          height: 'auto', // You might want to calculate this based on the aspect ratio
-          aspectRatio: '16 / 9', // Assuming a standard aspect ratio
+          // width: `100%`,
+          // height: 'auto', // You might want to calculate this based on the aspect ratio
+          // aspectRatio: '16 / 9', // Assuming a standard aspect ratio
         };
       }
 
@@ -156,7 +173,8 @@ const SlideEditor = ({ presentationId }) => {
         )}
         {contentItem.type === 'VIDEO' && (
           <iframe 
-            src={constructVideoSrc(contentItem.properties.videoUrl, contentItem.properties.autoPlay)} 
+            src={constructVideoSrc(contentItem.properties.videoUrl, contentItem.properties.autoPlay)}
+            onLoad={handleVideoLoad} // Assuming 960px is your slide deck width
             style={contentStyles} 
             frameBorder="0" 
             allow="autoplay; encrypted-media" 
@@ -191,8 +209,8 @@ const SlideEditor = ({ presentationId }) => {
           border: '2px dashed #ccc',
           position: 'relative',
           overflow: 'hidden',
-          height: '700px', // Set the desired height
-          width: '960px', // Set the desired width
+          height: {deckHeight}, // Set the desired height
+          width: {deckWidth}, // Set the desired width
         }}
       >
         {renderSlideContent()}

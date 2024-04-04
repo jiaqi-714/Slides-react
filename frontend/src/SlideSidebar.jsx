@@ -7,18 +7,17 @@ const SlideSidebar = ({ onAddContent }) => {
   const [contentProperties, setContentProperties] = useState({
     // Common properties
     position: { x: 0, y: 0 },
+    size: 50, // Unified size property as a percentage
     // Text properties
     text: '',
     fontSize: 1,
     color: '#000000',
     // Image properties
     imageUrl: '',
-    imageSize: 50, // Represented as a percentage
     imageAlt: '',
     isBase64: false, // Toggle between URL and Base64
     // Video properties
     videoUrl: '',
-    videoSize: 50, // Represented as a percentage
     autoPlay: false,
   });
 
@@ -26,16 +25,19 @@ const SlideSidebar = ({ onAddContent }) => {
     onAddContent(elementType, contentProperties);
     setElementType('');
     setContentProperties({
+      // Common properties
       position: { x: 0, y: 0 },
+      size: 50, // Unified size property as a percentage
+      // Text properties
       text: '',
       fontSize: 1,
       color: '#000000',
+      // Image properties
       imageUrl: '',
-      imageSize: 50,
       imageAlt: '',
-      isBase64: false,
+      isBase64: false, // Toggle between URL and Base64
+      // Video properties
       videoUrl: '',
-      videoSize: 50,
       autoPlay: false,
     });
   };
@@ -104,13 +106,13 @@ const SlideSidebar = ({ onAddContent }) => {
             />
             <Typography gutterBottom>Image Size (%)</Typography>
             <Slider
-              value={contentProperties.imageSize}
+              value={contentProperties.size}
               step={1}
               min={1}
               max={100}
               marks
               valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('imageSize', newValue)}
+              onChange={(e, newValue) => handleChange('size', newValue)}
             />
             <FormControlLabel
               control={
@@ -159,13 +161,13 @@ const SlideSidebar = ({ onAddContent }) => {
             />
             <Typography gutterBottom>Video Size (%)</Typography>
             <Slider
-              value={contentProperties.videoSize}
+              value={contentProperties.size}
               step={1}
               min={1}
               max={100}
               marks
               valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('videoSize', newValue)}
+              onChange={(e, newValue) => handleChange('size', newValue)}
             />
             <FormControlLabel
               control={
