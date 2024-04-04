@@ -102,7 +102,7 @@ const SlideEditor = ({ presentationId }) => {
 
   const renderSlideContent = () => {
     // Sort content by the 'layer' property for correct z-index handling
-    const sortedContent = slides[currentSlideIndex]?.content.sort((a, b) => a.layer - b.layer);
+    const sortedContent = (slides[currentSlideIndex]?.content || []).sort((a, b) => a.layer - b.layer);
 
     return sortedContent.map((contentItem, index) => {
       // Function to dynamically adjust the image size upon loading
@@ -181,83 +181,121 @@ const SlideEditor = ({ presentationId }) => {
         };
       }
 
-  
+      const isSelected = selectedContent?.id === contentItem.id;
+
+      // Define the styles for resize handles
+      const resizeHandleStyles = {
+        position: 'absolute',
+        width: '5px',
+        height: '5px',
+        backgroundColor: 'blue',
+        zIndex: 1000,
+      };
+    
+      const resizeHandles = isSelected ? [
+        { id: 'top-left', style: { ...resizeHandleStyles, left: '-2.5px', top: '-2.5px', cursor: 'nwse-resize' } },
+        { id: 'top-right', style: { ...resizeHandleStyles, right: '-2.5px', top: '-2.5px', cursor: 'nesw-resize' } },
+        { id: 'bottom-left', style: { ...resizeHandleStyles, left: '-2.5px', bottom: '-2.5px', cursor: 'nesw-resize' } },
+        { id: 'bottom-right', style: { ...resizeHandleStyles, right: '-2.5px', bottom: '-2.5px', cursor: 'nwse-resize' } },
+      ] : [];
+    
       return (
-        <Box key={contentItem.id} sx={boxStyles} onDoubleClick={() => console.log('Edit content properties')} onContextMenu={(e) => handleContextMenu(e, contentItem.id)}>
+        <Box
+          key={contentItem.id}
+          sx={{
+            ...boxStyles,
+            ...(isSelected && { boxShadow: "0 0 0 2px blue" }), // Optional: Highlight the selected box
+          }}
+          onMouseDown={(e) => handleMouseDown(e, contentItem.id)}
+          onDoubleClick={() => console.log('Edit content properties')}
+          onContextMenu={(e) => handleContextMenu(e, contentItem.id)}
+        >
           {contentItem.type === 'TEXT' && (
-            <Typography sx={{ fontSize: `${contentItem.properties.fontSize}em`, color: contentItem.properties.color }}>{contentItem.properties.text}</Typography>
+            <Typography sx={{ fontSize: `${contentItem.properties.fontSize}em`, color: contentItem.properties.color }}>
+              {contentItem.properties.text}
+            </Typography>
           )}
           {contentItem.type === 'IMAGE' && renderImageContent(contentItem, handleImageLoad, contentStyles)}
           {contentItem.type === 'VIDEO' && renderVideoContent(contentItem, handleVideoLoad, contentStyles)}
           {contentItem.type === 'CODE' && renderCodeContent(contentItem, contentStyles)}
+    
+          {resizeHandles.map(handle => (
+            <Box
+              key={handle.id}
+              sx={handle.style}
+              onMouseDown={(e) => handleResizeMouseDown(e, contentItem.id, handle.id)}
+            />
+          ))}
         </Box>
       );
     });
   };
 
   // resize and moving================================
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [selectedElementId, setSelectedElementId] = useState(null);
-  const [mouseStart, setMouseStart] = useState({ x: 0, y: 0 });
-  const [elementStart, setElementStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [resizing, setResizing] = useState(false);
+  const [selectedContent, setselectedContent] = useState(null);
+  const [dragStart, setDragStart] = useState({x: 0, y: 0});
+  const [resizeStart, setResizeStart] = useState({width: 0, height: 0});
   
-  const handleMouseDown = (e, id) => {
-    const element = slides[currentSlideIndex].content.find(el => el.id === id);
-    setIsDragging(true);
-    setSelectedElementId(id);
-    setMouseStart({ x: e.clientX, y: e.clientY });
-    setElementStart({
-      x: element.position.x,
-      y: element.position.y,
-      width: element.properties.width,
-      height: element.properties.height,
-    });
+  const handleMouseDown = (e, contentId) => {
+    // Prevent default action and event bubbling
+    e.preventDefault();
+    e.stopPropagation();
   
+    const content = slides[currentSlideIndex].content.find(el => el.id === contentId);
+    if (!content) return;
+  
+    setselectedContent(content);
+    setDragStart({x: e.clientX, y: e.clientY});
+    setDragging(true);
+    
+    // console.log({x: e.clientX, y: e.clientY})
+
+    // Bind mousemove and mouseup handlers to the document
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
   
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
+    if (!dragging) return;
+    
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    console.log(dx, dy)
+    
+    // console.log({x: e.clientX, y: e.clientY} , e.clientX, e.clientY)
+    // Calculate new position based on the initial drag start position and the current mouse position
+    const moveXPercentage = (dx / deckWidth) * 100;
+    const moveYPercentage = (dy / deckHeight) * 100;
+    console.log(moveXPercentage, moveYPercentage)
+
+    // Calculate new position percentages based on movement
+    const newXPercentage = selectedContent.properties.position.x + moveXPercentage;
+    const newYPercentage = selectedContent.properties.position.y + moveYPercentage;
   
-    const dx = e.clientX - mouseStart.x;
-    const dy = e.clientY - mouseStart.y;
+    // Clamp the new position to slide boundaries
+    const updatedX = Math.min(Math.max(newXPercentage, 0), 100);
+    const updatedY = Math.min(Math.max(newYPercentage, 0), 100);
   
-    // Convert dx, dy to percentages of the deck size for consistent scaling
-    const moveX = ((dx / deckWidth) * 100) + elementStart.x;
-    const moveY = ((dy / deckHeight) * 100) + elementStart.y;
-  
-    // Update position of the selected element in the slide
-    const updatedSlides = slides.map(slide => {
-      if (slide.id === presentationId) {
-        return {
-          ...slide,
-          content: slide.content.map(content => {
-            if (content.id === selectedElementId) {
-              return {
-                ...content,
-                position: { x: moveX, y: moveY },
-              };
-            }
-            return content;
-          }),
-        };
-      }
-      return slide;
-    });
-  
-    // Update slides state here
+    // Update position
+    updateContentOnSlide(
+      presentationId,
+      slides[currentSlideIndex].id,
+      selectedContent.id,
+      { position: { x: updatedX, y: updatedY } }
+    );
   };
   
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setIsResizing(false);
+  const handleMouseUp = (e) => {
+    if (!dragging) return;
   
+    setDragging(false);
+    setselectedContent(null);
+  
+    // Unbind mousemove and mouseup handlers from the document
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
-  
-    // Optionally update the slide content in your backend or state here
   };
 
   // =========================Context menu handler for content
@@ -305,10 +343,22 @@ const SlideEditor = ({ presentationId }) => {
             <AddCircleOutlineIcon />
           </IconButton>
           {slides.length > 1 && (
-            <IconButton onClick={() => handleDeleteSlide(slides[currentSlideIndex].id)} color="error">
+            <IconButton 
+              onClick={() => {
+                const slide = slides[currentSlideIndex];
+                if (slide) {
+                  handleDeleteSlide(slide.id);
+                }
+              }} 
+              color="error"
+            >
               <DeleteIcon />
             </IconButton>
           )}
+          {/* Display current page number and total slides */}
+          <Typography variant="body1" sx={{ marginX: 2 }}>
+            {currentSlideIndex + 1} / {slides.length}
+          </Typography>
         </Box>
 
       </Box>

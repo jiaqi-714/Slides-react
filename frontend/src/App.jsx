@@ -49,9 +49,6 @@ function App() {
                 <EditPresentation />
               </ProtectedRoute>
             } />
-            <Route path="/test" element={
-              <ExampleComponent />
-            } />
           </Routes>
         </Router>
       </PresentationProvider>
