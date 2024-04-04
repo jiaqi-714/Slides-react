@@ -7,6 +7,8 @@ const SlideSidebar = ({ onAddContent }) => {
   const [contentProperties, setContentProperties] = useState({
     position: { x: 0, y: 0 },
     size: 50, // Unified size property as a percentage for all element types
+    width: 50, // Width as a percentage of the deck's width
+    height: 30, // Height as a percentage (optional, if you need it)
     // Text properties
     text: '',
     fontSize: 1,
@@ -28,6 +30,8 @@ const SlideSidebar = ({ onAddContent }) => {
     setContentProperties({
       position: { x: 0, y: 0 },
       size: 50,
+      width: 50, // Width as a percentage of the deck's width
+      height: 30, // Height as a percentage (optional, if you need it)
       text: '',
       fontSize: 1,
       color: '#000000',
@@ -46,7 +50,7 @@ const SlideSidebar = ({ onAddContent }) => {
       [name]: typeof value === 'object' && value !== null ? { ...prev[name], ...value } : value
     }));
   };
-
+  
   const renderPropertiesInput = () => {
     switch (elementType) {
       case 'TEXT':
@@ -79,6 +83,28 @@ const SlideSidebar = ({ onAddContent }) => {
               value={contentProperties.color}
               onChange={(e) => handleChange('color', e.target.value)}
             />
+            <>
+              <Typography gutterBottom>Width (%)</Typography>
+              <Slider
+                value={contentProperties.width}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('width', newValue)}
+              />
+              <Typography gutterBottom>Height (%)</Typography>
+              <Slider
+                value={contentProperties.height}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('height', newValue)}
+              />
+            </>
             <Button variant="contained" color="primary" onClick={handleAddContent}>Add Text to Slide</Button>
             <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
           </>
@@ -143,6 +169,28 @@ const SlideSidebar = ({ onAddContent }) => {
                 />
               </Grid>
             </Grid>
+            <>
+              <Typography gutterBottom>Width (%)</Typography>
+              <Slider
+                value={contentProperties.width}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('width', newValue)}
+              />
+              <Typography gutterBottom>Height (%)</Typography>
+              <Slider
+                value={contentProperties.height}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('height', newValue)}
+              />
+            </>
             <Button variant="contained" color="primary" onClick={handleAddContent}>Add Image to Slide</Button>
           </>
         );
@@ -157,7 +205,7 @@ const SlideSidebar = ({ onAddContent }) => {
               value={contentProperties.videoUrl}
               onChange={(e) => handleChange('videoUrl', e.target.value)}
             />
-            <Typography gutterBottom>Video Size (%)</Typography>
+            {/* <Typography gutterBottom>Video Size (%)</Typography>
             <Slider
               value={contentProperties.size}
               step={1}
@@ -166,7 +214,7 @@ const SlideSidebar = ({ onAddContent }) => {
               marks
               valueLabelDisplay="auto"
               onChange={(e, newValue) => handleChange('size', newValue)}
-            />
+            /> */}
             <FormControlLabel
               control={
                 <Switch
@@ -176,6 +224,28 @@ const SlideSidebar = ({ onAddContent }) => {
               }
               label="Auto-Play"
             />
+            <>
+              <Typography gutterBottom>Width (%)</Typography>
+              <Slider
+                value={contentProperties.width}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('width', newValue)}
+              />
+              <Typography gutterBottom>Height (%)</Typography>
+              <Slider
+                value={contentProperties.height}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('height', newValue)}
+              />
+            </>
             <Button variant="contained" color="primary" onClick={handleAddContent}>Add Video to Slide</Button>
             <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
           </>
@@ -203,7 +273,7 @@ const SlideSidebar = ({ onAddContent }) => {
               valueLabelDisplay="auto"
               onChange={(e, newValue) => handleChange('fontSize', newValue)}
             />
-            <Typography gutterBottom>Size (%)</Typography>
+            {/* <Typography gutterBottom>Size (%)</Typography>
             <Slider
               value={contentProperties.size}
               step={1}
@@ -212,7 +282,29 @@ const SlideSidebar = ({ onAddContent }) => {
               marks
               valueLabelDisplay="auto"
               onChange={(e, newValue) => handleChange('size', newValue)}
-            />
+            /> */}
+            <>
+              <Typography gutterBottom>Width (%)</Typography>
+              <Slider
+                value={contentProperties.width}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('width', newValue)}
+              />
+              <Typography gutterBottom>Height (%)</Typography>
+              <Slider
+                value={contentProperties.height}
+                step={1}
+                min={1}
+                max={100}
+                marks
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => handleChange('height', newValue)}
+              />
+            </>
             <Button variant="contained" color="primary" onClick={handleAddContent}>Add Code to Slide</Button>
             <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
           </>

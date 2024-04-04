@@ -7,6 +7,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
+import CodeBlock from './codeBlock';
 
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
 const deckHeight = 700; // Assuming fixed height for now
@@ -72,9 +73,17 @@ const SlideEditor = ({ presentationId }) => {
     ></iframe>
   );
   
-  const renderCodeContent = (contentItem, contentStyles) => (
-    <pre style={contentStyles}>{contentItem.properties.code}</pre>
-  );
+  const renderCodeContent = (contentItem, contentStyles) => {
+    // Assuming contentStyles might contain any additional styling you want for the code block
+    return (
+      <CodeBlock 
+        code={contentItem.properties.code} 
+        // language={contentItem.properties.language} // Optional: if you have language info
+        style={contentStyles} // You can pass style directly to CodeBlock if it's modified to accept it
+      />
+    );
+  };
+  
 
   // Function to construct the video source URL, including autoplay parameters if necessary
   const constructVideoSrc = (videoUrl, autoplay) => {
@@ -131,13 +140,24 @@ const SlideEditor = ({ presentationId }) => {
         padding: 0,
         margin: 0,
         display: 'inline-block',
+        overflow: 'hidden',
       };
   
       // Apply border and padding for non-image content
       if (contentItem.type !== 'IMAGE') {
-        boxStyles = { ...boxStyles, border: '1px solid grey', padding: 1 };
+        boxStyles = { ...boxStyles, 
+        border: '1px solid grey', 
+        padding: 1, 
+        width: `${contentItem.properties.width}%`,
+        height: `${contentItem.properties.height}%`,};
       }
-  
+
+      // Apply border and padding for CODE content
+      if (contentItem.type == 'CODE') {
+        boxStyles = { ...boxStyles, 
+        background: '#f5f5f5',}
+      }
+
       // Style adjustments specifically for image and video content
       let contentStyles = {
         fontSize: `${contentItem.properties.fontSize}em`,
@@ -157,9 +177,7 @@ const SlideEditor = ({ presentationId }) => {
           ...contentStyles,
           whiteSpace: 'pre-wrap', // Preserve whitespaces and line breaks
           background: '#f5f5f5', // Example background color
-          padding: '10px',
           borderRadius: '5px',
-          // Apply syntax highlighting styles here if available
         };
       }
 
@@ -177,12 +195,76 @@ const SlideEditor = ({ presentationId }) => {
     });
   };
 
-  // Context menu handler for content
+  // resize and moving================================
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [selectedElementId, setSelectedElementId] = useState(null);
+  const [mouseStart, setMouseStart] = useState({ x: 0, y: 0 });
+  const [elementStart, setElementStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  
+  const handleMouseDown = (e, id) => {
+    const element = slides[currentSlideIndex].content.find(el => el.id === id);
+    setIsDragging(true);
+    setSelectedElementId(id);
+    setMouseStart({ x: e.clientX, y: e.clientY });
+    setElementStart({
+      x: element.position.x,
+      y: element.position.y,
+      width: element.properties.width,
+      height: element.properties.height,
+    });
+  
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+  
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+  
+    const dx = e.clientX - mouseStart.x;
+    const dy = e.clientY - mouseStart.y;
+  
+    // Convert dx, dy to percentages of the deck size for consistent scaling
+    const moveX = ((dx / deckWidth) * 100) + elementStart.x;
+    const moveY = ((dy / deckHeight) * 100) + elementStart.y;
+  
+    // Update position of the selected element in the slide
+    const updatedSlides = slides.map(slide => {
+      if (slide.id === presentationId) {
+        return {
+          ...slide,
+          content: slide.content.map(content => {
+            if (content.id === selectedElementId) {
+              return {
+                ...content,
+                position: { x: moveX, y: moveY },
+              };
+            }
+            return content;
+          }),
+        };
+      }
+      return slide;
+    });
+  
+    // Update slides state here
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsResizing(false);
+  
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  
+    // Optionally update the slide content in your backend or state here
+  };
+
+  // =========================Context menu handler for content
   const handleContextMenu = (e, contentId) => {
     e.preventDefault(); // Prevent the default context menu
     handleDeleteContent(contentId); // Handle content deletion
   };
-  
 
   const handleDeleteContent = async (contentId) => {
     // Logic to delete content by ID from the current slide
