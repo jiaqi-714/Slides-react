@@ -1,4 +1,4 @@
-// PresentationContext.js
+// PresentationContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import config from './config.json';
 import { useAuth } from './AuthContext';
@@ -65,7 +65,7 @@ export const PresentationProvider = ({ children }) => {
         // Initialize slides as an empty array if it doesn't exist
         const existingSlides = Array.isArray(presentation.slides) ? presentation.slides : [];
         // Create a new slide object. Customize as needed.
-        const newSlide = { id: uuidv4(), content: 'New slide' };
+        const newSlide = { id: uuidv4(), content: [] };
         return { ...presentation, slides: [...existingSlides, newSlide] };
       }
       return presentation;
@@ -112,8 +112,92 @@ export const PresentationProvider = ({ children }) => {
     await updateStore(updatedPresentations);
   };
 
+  const addContentToSlide = async (presentationId, slideId, content) => {
+    let updatedPresentations = presentations.map(presentation => {
+      if (presentation.id === presentationId) {
+        const updatedSlides = presentation.slides.map(slide => {
+          if (slide.id === slideId) {
+            const existingContent = Array.isArray(slide.content) ? slide.content : [];
+            const newContent = {
+              ...content,
+              id: uuidv4(),
+              layer: existingContent.length // Use the length as the layer value
+            };
+            return {
+              ...slide,
+              content: [...existingContent, newContent]
+            };
+          }
+          return slide;
+        });
+        return { ...presentation, slides: updatedSlides };
+      }
+      return presentation;
+    });
+
+    await updateStore(updatedPresentations);
+  };
+
+  
+  const updateContentOnSlide = async (presentationId, slideId, contentId, newContent) => {
+    let updatedPresentations = presentations.map(presentation => {
+      if (presentation.id === presentationId) {
+        const updatedSlides = presentation.slides.map(slide => {
+          if (slide.id === slideId) {
+            // Map through content to find the specific piece to update
+            const updatedContent = slide.content.map(contentPiece => {
+              if (contentPiece.id === contentId) {
+                return { ...contentPiece, ...newContent };
+              }
+              return contentPiece;
+            });
+            return { ...slide, content: updatedContent };
+          }
+          return slide;
+        });
+        return { ...presentation, slides: updatedSlides };
+      }
+      return presentation;
+    });
+
+    // Update state and backend
+    await updateStore(updatedPresentations);
+  };
+
+  const deleteContentFromSlide = async (presentationId, slideId, contentId) => {
+
+    let updatedPresentations = presentations.map(presentation => {
+      if (presentation.id === presentationId) {
+        // Find the slide and filter out the content by contentId
+        const updatedSlides = presentation.slides.map(slide => {
+          if (slide.id === slideId) {
+            const updatedContent = slide.content.filter(content => content.id !== contentId);
+            return { ...slide, content: updatedContent };
+          }
+          return slide;
+        });
+        return { ...presentation, slides: updatedSlides };
+      }
+      return presentation;
+    });
+
+    // Update state and backend
+    await updateStore(updatedPresentations);
+  };
+
   return (
-    <PresentationContext.Provider value={{ presentations, addPresentation, deletePresentation, updatePresentationTitle, addSlideToPresentation, updatePresentationSlides, deleteSlide }}>
+    <PresentationContext.Provider value={{
+      presentations,
+      addPresentation,
+      deletePresentation,
+      updatePresentationTitle,
+      addSlideToPresentation,
+      updatePresentationSlides,
+      deleteSlide,
+      addContentToSlide, // Add this line
+      updateContentOnSlide,
+      deleteContentFromSlide,
+    }}>
       {children}
     </PresentationContext.Provider>
   );

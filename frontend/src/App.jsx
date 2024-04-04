@@ -45,9 +45,9 @@ function App() {
             } />
             <Route path="/presentation/:presentationId" element={
               <ProtectedRoute>
-                <MainLayout NavBarComponent={NavBar}>
-                  <EditPresentation />
-                </MainLayout>
+                {/* <MainLayout NavBarComponent={NavBar}> */}
+                <EditPresentation />
+                {/* </MainLayout> */}
               </ProtectedRoute>
             } />
           </Routes>

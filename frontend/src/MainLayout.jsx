@@ -1,10 +1,10 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 
-const MainLayout = ({ children, NavBarComponent }) => {
+const MainLayout = ({ children, NavBarComponent, navBarProps }) => {
   return (
     <Box sx={{ display: 'flex', minHeight: '95vh' }}>
-      {NavBarComponent && <NavBarComponent />} {/* Conditionally render the NavBar if provided */}
+      {NavBarComponent && <NavBarComponent {...navBarProps} />} {/* Conditionally render the NavBar if provided */}
       <Box
         component="main"
         sx={{
