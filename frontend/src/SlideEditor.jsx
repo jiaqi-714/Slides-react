@@ -49,12 +49,54 @@ const SlideEditor = ({ presentationId }) => {
     }
   };
 
+  // =================================
+  // Helper function to render image content
+  const renderImageContent = (contentItem, handleImageLoad, contentStyles) => (
+    <img
+      src={contentItem.properties.isBase64 ? `data:image/jpeg;base64,${contentItem.properties.imageUrl}` : contentItem.properties.imageUrl}
+      alt={contentItem.properties.imageAlt}
+      onLoad={handleImageLoad}
+      style={contentStyles}
+    />
+  );
+  
+  // Helper function to render video content
+  const renderVideoContent = (contentItem, handleVideoLoad, contentStyles) => (
+    <iframe
+      src={constructVideoSrc(contentItem.properties.videoUrl, contentItem.properties.autoPlay)}
+      onLoad={handleVideoLoad}
+      style={contentStyles}
+      frameBorder="0"
+      allow="autoplay; encrypted-media"
+      allowFullScreen
+    ></iframe>
+  );
+  
+  const renderCodeContent = (contentItem, contentStyles) => (
+    <pre style={contentStyles}>{contentItem.properties.code}</pre>
+  );
+
+  // Function to construct the video source URL, including autoplay parameters if necessary
+  const constructVideoSrc = (videoUrl, autoplay) => {
+    const videoId = extractYouTubeVideoID(videoUrl);
+    const baseUrl = `https://www.youtube.com/embed/${videoId}`;
+    const autoplayParam = autoplay ? "?autoplay=1&mute=1" : "";
+    return `${baseUrl}${autoplayParam}`;
+  };
+
+  // Extracts the YouTube video ID from a given URL
+  const extractYouTubeVideoID = (videoUrl) => {
+    const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const matches = videoUrl.match(regex);
+    return matches ? matches[1] : null;
+  };
+
   const renderSlideContent = () => {
-    // Sort content by the 'layer' property before mapping
+    // Sort content by the 'layer' property for correct z-index handling
     const sortedContent = slides[currentSlideIndex]?.content.sort((a, b) => a.layer - b.layer);
 
     return sortedContent.map((contentItem, index) => {
-      // Placeholder function for image load to adjust its container size
+      // Function to dynamically adjust the image size upon loading
       const handleImageLoad = (event) => {
         const imageSizeRatio = contentItem.properties.size / 100; // Convert percentage to a ratio
         const naturalWidth = event.target.naturalWidth;
@@ -62,26 +104,21 @@ const SlideEditor = ({ presentationId }) => {
         const deckRatio = deckWidth / naturalWidth;
         const displayedWidth = naturalWidth * imageSizeRatio * deckRatio;
         const displayedHeight = naturalHeight * imageSizeRatio * deckRatio;
-        // Here, you might want to dynamically adjust the container or just use these for setting the image style
         event.target.style.width = `${displayedWidth}px`;
         event.target.style.height = `${displayedHeight}px`;
-        console.log(event.target.style.width, event.target.style.height)
       };
-  
+    
+      // Function to dynamically adjust the video size upon loading (assuming iframe loading)
       const handleVideoLoad = (event) => {
-        // Calculate the desired video width as a percentage of the slide deck width
         const desiredWidth = deckWidth * contentItem.properties.size / 100;
-      
-        // Maintain a 16:9 aspect ratio for the video
-        const aspectRatio = 16 / 9;
+        const aspectRatio = 16 / 9; // Maintain a 16:9 aspect ratio
         const desiredHeight = desiredWidth / aspectRatio;
-      
-        // Set the iframe size
         event.target.style.width = `${desiredWidth}px`;
         event.target.style.height = `${desiredHeight}px`;
       };
 
-      // Adjust border and padding for image content
+
+      // Define default box styles for content
       let boxStyles = {
         position: 'absolute',
         top: `${contentItem.properties.position.y}%`,
@@ -89,104 +126,63 @@ const SlideEditor = ({ presentationId }) => {
         cursor: 'pointer',
         zIndex: contentItem.layer,
         backgroundColor: 'rgba(255,255,255,0.5)',
-        '&:hover': {
-          boxShadow: '0 0 8px rgba(0, 0, 0, 0.25)',
-        },
+        '&:hover': { boxShadow: '0 0 8px rgba(0, 0, 0, 0.25)' },
         boxSizing: 'border-box',
         padding: 0,
         margin: 0,
-        display: 'inline-block', // This can help fitting to the content size
+        display: 'inline-block',
       };
-
+  
+      // Apply border and padding for non-image content
       if (contentItem.type !== 'IMAGE') {
         boxStyles = { ...boxStyles, border: '1px solid grey', padding: 1 };
       }
+  
+      // Style adjustments specifically for image and video content
+      let contentStyles = {
+        fontSize: `${contentItem.properties.fontSize}em`,
+        color: contentItem.properties.color,
+      };
 
-      // Adjust styles specifically for images and videos
-      let contentStyles = {};
       if (contentItem.type === 'IMAGE') {
         contentStyles = {
-          // width: `${contentItem.properties.size}%`,
-          // height: 'auto',
           display: 'block',
         };
       } else if (contentItem.type === 'VIDEO') {
         contentStyles = {
-          // width: `100%`,
-          // height: 'auto', // You might want to calculate this based on the aspect ratio
-          // aspectRatio: '16 / 9', // Assuming a standard aspect ratio
+          aspectRatio: '16 / 9',
+        };
+      } else if (contentItem.type === 'CODE') {
+        contentStyles = {
+          ...contentStyles,
+          whiteSpace: 'pre-wrap', // Preserve whitespaces and line breaks
+          background: '#f5f5f5', // Example background color
+          padding: '10px',
+          borderRadius: '5px',
+          // Apply syntax highlighting styles here if available
         };
       }
 
-      // Extracts YouTube video ID from various YouTube URL formats
-      const extractYouTubeVideoID = (videoUrl) => {
-        const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const matches = videoUrl.match(regex);
-        return matches ? matches[1] : null;
-      };
-
-      // Constructs embed URL with autoplay option if required
-      const constructVideoSrc = (videoUrl, autoplay) => {
-        const videoId = extractYouTubeVideoID(videoUrl);
-        if (!videoId) return ""; // Return empty string or handle error appropriately
-        const baseUrl = `https://www.youtube.com/embed/${videoId}`;
-        const autoplayParam = autoplay ? "?autoplay=1&mute=1" : ""; // Autoplay needs mute=1 to work in most cases
-        return `${baseUrl}${autoplayParam}`;
-      };
-    
+  
       return (
-      <Box
-        key={contentItem.id} // Assuming each contentItem has a unique 'id' property
-        sx={boxStyles}
-        onDoubleClick={() => console.log('Edit content properties')} // Placeholder for edit action
-        onContextMenu={(e) => {
-          e.preventDefault(); // Prevent the browser context menu from opening
-          handleDeleteContent(contentItem.id); // Call deletion logic
-        }}
-      >
-        {contentItem.type === 'TEXT' && (
-          <Typography
-            sx={{
-              fontSize: `${contentItem.properties.fontSize}em`,
-              color: contentItem.properties.color,
-            }}
-          >
-            {contentItem.properties.text}
-          </Typography>
-        )}
-        {contentItem.type === 'IMAGE' && (
-          contentItem.properties.isBase64 ? (
-            <img
-              src={`data:image/jpeg;base64,${contentItem.properties.imageUrl}`}
-              alt={contentItem.properties.imageAlt}
-              onLoad={handleImageLoad}
-              style={contentStyles}
-            />
-          ) : (
-            <img
-              src={contentItem.properties.imageUrl}
-              alt={contentItem.properties.imageAlt}
-              onLoad={handleImageLoad}
-              style={contentStyles}
-            />
-          )
-        )}
-        {contentItem.type === 'VIDEO' && (
-          <iframe 
-            src={constructVideoSrc(contentItem.properties.videoUrl, contentItem.properties.autoPlay)}
-            onLoad={handleVideoLoad} // Assuming 960px is your slide deck width
-            style={contentStyles} 
-            frameBorder="0" 
-            allow="autoplay; encrypted-media" 
-            allowFullScreen>
-          </iframe>
-        )}
-
-        {/* Implement rendering logic for other content types like VIDEO, etc. */}
-      </Box>
+        <Box key={contentItem.id} sx={boxStyles} onDoubleClick={() => console.log('Edit content properties')} onContextMenu={(e) => handleContextMenu(e, contentItem.id)}>
+          {contentItem.type === 'TEXT' && (
+            <Typography sx={{ fontSize: `${contentItem.properties.fontSize}em`, color: contentItem.properties.color }}>{contentItem.properties.text}</Typography>
+          )}
+          {contentItem.type === 'IMAGE' && renderImageContent(contentItem, handleImageLoad, contentStyles)}
+          {contentItem.type === 'VIDEO' && renderVideoContent(contentItem, handleVideoLoad, contentStyles)}
+          {contentItem.type === 'CODE' && renderCodeContent(contentItem, contentStyles)}
+        </Box>
       );
     });
   };
+
+  // Context menu handler for content
+  const handleContextMenu = (e, contentId) => {
+    e.preventDefault(); // Prevent the default context menu
+    handleDeleteContent(contentId); // Handle content deletion
+  };
+  
 
   const handleDeleteContent = async (contentId) => {
     // Logic to delete content by ID from the current slide

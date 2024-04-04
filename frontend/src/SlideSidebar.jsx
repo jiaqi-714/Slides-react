@@ -1,44 +1,42 @@
 // SlideSidebar.jsx
 import React, { useState } from 'react';
-import { Box, Button, Typography, TextField, Slider, FormControlLabel, Switch, Grid } from '@mui/material';
+import { Box, Button, Typography, TextField, Slider, FormControlLabel, Switch, Grid, Select, MenuItem, InputLabel } from '@mui/material';
 
 const SlideSidebar = ({ onAddContent }) => {
   const [elementType, setElementType] = useState('');
   const [contentProperties, setContentProperties] = useState({
-    // Common properties
     position: { x: 0, y: 0 },
-    size: 50, // Unified size property as a percentage
+    size: 50, // Unified size property as a percentage for all element types
     // Text properties
     text: '',
     fontSize: 1,
     color: '#000000',
-    // Image properties
+    // Image & Video properties
     imageUrl: '',
     imageAlt: '',
-    isBase64: false, // Toggle between URL and Base64
-    // Video properties
+    isBase64: false,
     videoUrl: '',
     autoPlay: false,
+    // Code properties
+    code: '',
   });
 
   const handleAddContent = () => {
     onAddContent(elementType, contentProperties);
+    // Reset state after adding content
     setElementType('');
     setContentProperties({
-      // Common properties
       position: { x: 0, y: 0 },
-      size: 50, // Unified size property as a percentage
-      // Text properties
+      size: 50,
       text: '',
       fontSize: 1,
       color: '#000000',
-      // Image properties
       imageUrl: '',
       imageAlt: '',
-      isBase64: false, // Toggle between URL and Base64
-      // Video properties
+      isBase64: false,
       videoUrl: '',
       autoPlay: false,
+      code: '',
     });
   };
 
@@ -182,6 +180,43 @@ const SlideSidebar = ({ onAddContent }) => {
             <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
           </>
         );
+      case 'CODE':
+        return (
+          <>
+            <TextField
+              label="Code"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={4}
+              margin="normal"
+              value={contentProperties.code}
+              onChange={(e) => handleChange('code', e.target.value)}
+            />
+            <Typography gutterBottom>Font Size (em)</Typography>
+            <Slider
+              value={contentProperties.fontSize}
+              step={0.1}
+              min={0.5}
+              max={3}
+              marks
+              valueLabelDisplay="auto"
+              onChange={(e, newValue) => handleChange('fontSize', newValue)}
+            />
+            <Typography gutterBottom>Size (%)</Typography>
+            <Slider
+              value={contentProperties.size}
+              step={1}
+              min={1}
+              max={100}
+              marks
+              valueLabelDisplay="auto"
+              onChange={(e, newValue) => handleChange('size', newValue)}
+            />
+            <Button variant="contained" color="primary" onClick={handleAddContent}>Add Code to Slide</Button>
+            <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
+          </>
+        );
         // Implement cases for other types like VIDEO if needed
       default:
         return null;
@@ -193,6 +228,7 @@ const SlideSidebar = ({ onAddContent }) => {
       <Button onClick={() => setElementType('TEXT')}>Text</Button>
       <Button onClick={() => setElementType('IMAGE')}>Image</Button>
       <Button onClick={() => setElementType('VIDEO')}>Video</Button>
+      <Button onClick={() => setElementType('CODE')}>Code</Button>
       {renderPropertiesInput()}
     </Box>
   );
