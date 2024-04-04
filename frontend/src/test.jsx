@@ -1,5 +1,5 @@
 import React from 'react';
-import Rnd from 'react-rnd';
+import { Rnd } from 'react-rnd';
 
 const Box = () => (
   <div
@@ -40,25 +40,29 @@ const Box = () => (
   </div>
 );
 
-const test = (
+const ExampleComponent = () => {
+  return (
     <div
-      style={{
-        width: '800px',
-        height: '400px',
+    style={{
+      width: '800px',
+      height: '400px',
+    }}
+  >
+    <Rnd
+      default={{
+        x: 150,
+        y: 205,
+        width: 500,
+        height: 190,
       }}
+      minWidth={500}
+      minHeight={190}
+      bounds="window"
     >
-      <Rnd
-        default={{
-          x: 150,
-          y: 205,
-          width: 500,
-          height: 190,
-        }}
-        minWidth={500}
-        minHeight={190}
-        bounds="window"
-      >
-        <Box />
-      </Rnd>
-    </div>
-);
+      <Box />
+    </Rnd>
+  </div>
+  );
+};
+
+export default ExampleComponent;

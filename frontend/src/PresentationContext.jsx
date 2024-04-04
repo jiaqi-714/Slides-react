@@ -139,7 +139,7 @@ export const PresentationProvider = ({ children }) => {
   };
 
   
-  const updateContentOnSlide = async (presentationId, slideId, contentId, newContent) => {
+  const updateContentOnSlide = async (presentationId, slideId, contentId, newProperties) => {
     let updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         const updatedSlides = presentation.slides.map(slide => {
@@ -147,7 +147,13 @@ export const PresentationProvider = ({ children }) => {
             // Map through content to find the specific piece to update
             const updatedContent = slide.content.map(contentPiece => {
               if (contentPiece.id === contentId) {
-                return { ...contentPiece, ...newContent };
+                return {
+                  ...contentPiece,
+                  properties: {
+                    ...contentPiece.properties,
+                    ...newProperties
+                  }
+                };
               }
               return contentPiece;
             });
@@ -160,9 +166,10 @@ export const PresentationProvider = ({ children }) => {
       return presentation;
     });
 
-    // Update state and backend
-    await updateStore(updatedPresentations);
+  // Update state and backend
+  await updateStore(updatedPresentations);
   };
+
 
   const deleteContentFromSlide = async (presentationId, slideId, contentId) => {
 
@@ -197,6 +204,7 @@ export const PresentationProvider = ({ children }) => {
       addContentToSlide, // Add this line
       updateContentOnSlide,
       deleteContentFromSlide,
+      setPresentations,
     }}>
       {children}
     </PresentationContext.Provider>

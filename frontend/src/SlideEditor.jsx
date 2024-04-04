@@ -8,6 +8,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 import CodeBlock from './codeBlock';
+import { Rnd } from 'react-rnd';
+
 
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
 const deckHeight = 700; // Assuming fixed height for now
@@ -20,6 +22,8 @@ const SlideEditor = ({ presentationId }) => {
     addContentToSlide,
     updateContentOnSlide,
     deleteContentFromSlide,
+    updateContentPosition,
+    updateContentSize,
   } = usePresentations();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -58,6 +62,7 @@ const SlideEditor = ({ presentationId }) => {
       alt={contentItem.properties.imageAlt}
       onLoad={handleImageLoad}
       style={contentStyles}
+      draggable="false"
     />
   );
   
@@ -181,83 +186,59 @@ const SlideEditor = ({ presentationId }) => {
         };
       }
 
+      const initialWidth = `${contentItem.properties.width}%`;
+      const initialHeight = `${contentItem.properties.height}%`;
+      const initialX = `${contentItem.properties.position.x}%`;
+      const initialY = `${contentItem.properties.position.y}%`;
   
       return (
-        <Box key={contentItem.id} sx={boxStyles} onDoubleClick={() => console.log('Edit content properties')} onContextMenu={(e) => handleContextMenu(e, contentItem.id)}>
+        <Rnd
+          key={contentItem.id}
+          size={{ width: initialWidth, height: initialHeight }}
+          position={{ x: parseFloat(initialX), y: parseFloat(initialY) }}
+          onDragStop={(e, d) => {
+            // Handle drag stop to update content position
+            updateContentOnSlide(
+              presentationId, 
+              slides[currentSlideIndex].id, 
+              contentItem.id, 
+              { position: { x: d.x, y: d.y } } // Correctly structured to match the existing content properties
+            );
+            // console.log(presentation, currentSlideIndex)
+          }}
+          onResizeStop={(e, direction, ref, delta, position) => {
+            // Handle resize stop to update content size
+            updateContentOnSlide(
+              presentationId, 
+              slides[currentSlideIndex].id, 
+              contentItem.id, 
+              {
+                width: ref.style.width / deckWidth * 100, // Convert px to % of the deck width
+                height: ref.style.width / deckHeight * 100 // Convert px to % of the deck height
+              }
+            );
+          }}
+          onContextMenu={(e) => handleContextMenu(e, contentItem.id)}
+
+          bounds="parent" // To restrict movement within the slide area
+          style={{
+            border: '1px solid #ccc', // Add a border
+            boxSizing: 'border-box', // Ensure the dimensions include the border
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            overflow: 'hidden'
+          }}
+        >
           {contentItem.type === 'TEXT' && (
-            <Typography sx={{ fontSize: `${contentItem.properties.fontSize}em`, color: contentItem.properties.color }}>{contentItem.properties.text}</Typography>
+            <Typography sx={{ fontSize: `${contentItem.properties.fontSize}em`, color: contentItem.properties.color }}>
+              {contentItem.properties.text}
+            </Typography>
           )}
           {contentItem.type === 'IMAGE' && renderImageContent(contentItem, handleImageLoad, contentStyles)}
           {contentItem.type === 'VIDEO' && renderVideoContent(contentItem, handleVideoLoad, contentStyles)}
           {contentItem.type === 'CODE' && renderCodeContent(contentItem, contentStyles)}
-        </Box>
+        </Rnd>
       );
     });
-  };
-
-  // resize and moving================================
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [selectedElementId, setSelectedElementId] = useState(null);
-  const [mouseStart, setMouseStart] = useState({ x: 0, y: 0 });
-  const [elementStart, setElementStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  
-  const handleMouseDown = (e, id) => {
-    const element = slides[currentSlideIndex].content.find(el => el.id === id);
-    setIsDragging(true);
-    setSelectedElementId(id);
-    setMouseStart({ x: e.clientX, y: e.clientY });
-    setElementStart({
-      x: element.position.x,
-      y: element.position.y,
-      width: element.properties.width,
-      height: element.properties.height,
-    });
-  
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-  
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-  
-    const dx = e.clientX - mouseStart.x;
-    const dy = e.clientY - mouseStart.y;
-  
-    // Convert dx, dy to percentages of the deck size for consistent scaling
-    const moveX = ((dx / deckWidth) * 100) + elementStart.x;
-    const moveY = ((dy / deckHeight) * 100) + elementStart.y;
-  
-    // Update position of the selected element in the slide
-    const updatedSlides = slides.map(slide => {
-      if (slide.id === presentationId) {
-        return {
-          ...slide,
-          content: slide.content.map(content => {
-            if (content.id === selectedElementId) {
-              return {
-                ...content,
-                position: { x: moveX, y: moveY },
-              };
-            }
-            return content;
-          }),
-        };
-      }
-      return slide;
-    });
-  
-    // Update slides state here
-  };
-  
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setIsResizing(false);
-  
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  
-    // Optionally update the slide content in your backend or state here
   };
 
   // =========================Context menu handler for content
