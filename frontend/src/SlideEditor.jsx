@@ -1,5 +1,5 @@
 //SlideEditor.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, IconButton, Modal, TextField, Button } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -22,13 +22,20 @@ const SlideEditor = ({ presentationId }) => {
     addContentToSlide,
     updateContentOnSlide,
     deleteContentFromSlide,
-    updateContentPosition,
-    updateContentSize,
+    updateContentStateOnSlide,
+    updateStore,
   } = usePresentations();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const presentation = presentations.find(p => p.id === presentationId);
   const slides = presentation?.slides || [];
+  const presentationsRef = useRef();
+  // Whenever presentations state updates, keep presentationsRef current
+  useEffect(() => {
+    presentationsRef.current = presentations;
+    // console.log(presentationsRef.current)
+  }, [presentations]);
+
   const handleAddSlide = async () => {
     await addSlideToPresentation(presentationId);
   };
@@ -287,7 +294,7 @@ const SlideEditor = ({ presentationId }) => {
     const clampedY = Math.min(Math.max(newYPercentage, 0), maxPossibleY);
 
     // Update position using the clamped values
-    updateContentOnSlide(
+    updateContentStateOnSlide(
       presentationId,
       slides[currentSlideIndex].id,
       selectedContent.id,
@@ -296,10 +303,10 @@ const SlideEditor = ({ presentationId }) => {
   };
   const handleMouseUp = (e) => {
     if (!dragging) return;
-  
-    setDragging(false);
+    updateStore(presentationsRef.current)
+
     setSelectedContent(null);
-  
+    setDragging(false);
     // Unbind mousemove and mouseup handlers from the document
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
@@ -308,7 +315,6 @@ const SlideEditor = ({ presentationId }) => {
   //============================
   
   // Add to your component state
-  const [resizeCorner, setResizeCorner] = useState(null);
   const originalPositionRef = useRef({ x: 0, y: 0 });
   const resizingRef = useRef(false);
   const originalSizeRef = useRef({ width: 0, height: 0 });
@@ -323,7 +329,6 @@ const SlideEditor = ({ presentationId }) => {
       if (!content) return;
       
       resizingRef.current = true; // Use ref to track resizing state
-      setResizeCorner(corner);
       setSelectedContent(content);
       
       // Store the initial size
@@ -372,7 +377,7 @@ const SlideEditor = ({ presentationId }) => {
         newY = Math.max(Math.min(newY, 100 - newHeight), 0);
         
         // Update the size and position together
-        updateContentOnSlide(presentationId, slides[currentSlideIndex].id, selectedContent.id, {
+        updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContent.id, {
             width: newWidth,
             height: newHeight,
             position: { x: newX, y: newY },
@@ -381,7 +386,8 @@ const SlideEditor = ({ presentationId }) => {
   
       const handleMouseUpAfterResize = () => {
         if (!resizingRef.current) return; // Check ref instead of state
-      
+
+        updateStore(presentationsRef.current)
         resizingRef.current = false; // Update ref to indicate resizing end
       
         document.removeEventListener('mousemove', handleMouseMoveDuringResize);
