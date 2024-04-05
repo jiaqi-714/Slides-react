@@ -8,6 +8,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 import CodeBlock from './codeBlock';
+import { Rnd } from 'react-rnd';
+
 
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
 const deckHeight = 700; // Assuming fixed height for now
@@ -20,6 +22,8 @@ const SlideEditor = ({ presentationId }) => {
     addContentToSlide,
     updateContentOnSlide,
     deleteContentFromSlide,
+    updateContentPosition,
+    updateContentSize,
   } = usePresentations();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -58,6 +62,7 @@ const SlideEditor = ({ presentationId }) => {
       alt={contentItem.properties.imageAlt}
       onLoad={handleImageLoad}
       style={contentStyles}
+      draggable="false"
     />
   );
   

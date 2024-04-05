@@ -11,7 +11,7 @@ import ProtectedRoute from './ProtectedRoute'; // Import ProtectedRoute
 import { PresentationProvider } from './PresentationContext'; // Adjust the path as necessary
 import MainLayout from './MainLayout'
 import { NavBar } from './NavBar';
-// import test from './test';
+import ExampleComponent from './test';
 
 function App() {
   return (
