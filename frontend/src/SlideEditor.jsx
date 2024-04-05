@@ -29,7 +29,6 @@ const SlideEditor = ({ presentationId }) => {
 
   const presentation = presentations.find(p => p.id === presentationId);
   const slides = presentation?.slides || [];
-
   const handleAddSlide = async () => {
     await addSlideToPresentation(presentationId);
   };
@@ -238,9 +237,7 @@ const SlideEditor = ({ presentationId }) => {
 
   // resize and moving================================
   const [dragging, setDragging] = useState(false);
-  const [resizing, setResizing] = useState(false);
-  const [selectedContent, setselectedContent] = useState(null);
-  const [resizeStart, setResizeStart] = useState({width: 0, height: 0});
+  const [selectedContent, setSelectedContent] = useState(null);
   const dragStartRef = useRef({x: 0, y: 0});
 
   const handleMouseDown = (e, contentId) => {
@@ -251,7 +248,7 @@ const SlideEditor = ({ presentationId }) => {
     const content = slides[currentSlideIndex].content.find(el => el.id === contentId);
     if (!content) return;
 
-    setselectedContent(content);
+    setSelectedContent(content);
     setDragging(true);
     
     // Bind mousemove and mouseup handlers to the document
@@ -263,7 +260,7 @@ const SlideEditor = ({ presentationId }) => {
   
   const handleMouseMove = (e) => {
     if (!dragging) return;
-    
+    // console.log("dragging")
     // In handleMouseMove, use dragStartRef.current instead of dragStart
     const dx = e.clientX - dragStartRef.current.x;
     const dy = e.clientY - dragStartRef.current.y;
@@ -273,32 +270,126 @@ const SlideEditor = ({ presentationId }) => {
     const moveXPercentage = (dx / deckWidth) * 100;
     const moveYPercentage = (dy / deckHeight) * 100;
 
+    // Assuming you have the content's width and height in percentages as contentWidthPercentage and contentHeightPercentage
+    const contentWidthPercentage = selectedContent.properties.width;
+    const contentHeightPercentage = selectedContent.properties.height;
+
     // Calculate new position percentages based on movement
     const newXPercentage = selectedContent.properties.position.x + moveXPercentage;
     const newYPercentage = selectedContent.properties.position.y + moveYPercentage;
-  
-    // Clamp the new position to slide boundaries
-    const updatedX = Math.min(Math.max(newXPercentage, 0), 100);
-    const updatedY = Math.min(Math.max(newYPercentage, 0), 100);
-  
-    // Update position
+
+    // Clamp the new X position to ensure the content doesn't go beyond the right slide boundary
+    const maxPossibleX = 100 - contentWidthPercentage; // Subtract content width from 100% to get the maximum possible X
+    const clampedX = Math.min(Math.max(newXPercentage, 0), maxPossibleX);
+
+    // Clamp the new Y position to ensure the content doesn't go beyond the bottom slide boundary
+    const maxPossibleY = 100 - contentHeightPercentage; // Subtract content height from 100% to get the maximum possible Y
+    const clampedY = Math.min(Math.max(newYPercentage, 0), maxPossibleY);
+
+    // Update position using the clamped values
     updateContentOnSlide(
       presentationId,
       slides[currentSlideIndex].id,
       selectedContent.id,
-      { position: { x: updatedX, y: updatedY } }
+      { position: { x: clampedX, y: clampedY } }
     );
   };
-  
   const handleMouseUp = (e) => {
     if (!dragging) return;
   
     setDragging(false);
-    setselectedContent(null);
+    setSelectedContent(null);
   
     // Unbind mousemove and mouseup handlers from the document
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  //============================
+  
+  // Add to your component state
+  const [resizeCorner, setResizeCorner] = useState(null);
+  const originalPositionRef = useRef({ x: 0, y: 0 });
+  const resizingRef = useRef(false);
+  const originalSizeRef = useRef({ width: 0, height: 0 });
+  const finalSizeRef = useRef({ width: 0, height: 0 }); // Ref to track the final size after resizing
+
+
+  const handleResizeMouseDown = (e, contentId, corner) => {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      const content = slides[currentSlideIndex].content.find(item => item.id === contentId);
+      if (!content) return;
+      
+      resizingRef.current = true; // Use ref to track resizing state
+      setResizeCorner(corner);
+      setSelectedContent(content);
+      
+      // Store the initial size
+      originalSizeRef.current = { width: content.properties.width, height: content.properties.height };
+      finalSizeRef.current = { ...originalSizeRef.current }; // Initialize finalSizeRef with the original size
+      originalPositionRef.current = { ...content.properties.position };
+
+      const initialMouseXPercentage = (e.clientX / deckWidth) * 100;
+      const initialMouseYPercentage = (e.clientY / deckHeight) * 100;
+
+      const handleMouseMoveDuringResize = (moveEvent) => {
+        if (!resizingRef.current) return;
+    
+        const dxPercentage = ((moveEvent.clientX / deckWidth) * 100) - initialMouseXPercentage;
+        const dyPercentage = ((moveEvent.clientY / deckHeight) * 100) - initialMouseYPercentage;
+        
+        let newWidth, newHeight, newX, newY;
+        switch(corner) {
+          case 'bottom-right':
+            newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
+            newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
+            newX = originalPositionRef.current.x;
+            newY = originalPositionRef.current.y;
+            break;
+          case 'top-right':
+            newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
+            newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
+            newX = originalPositionRef.current.x;
+            newY = originalPositionRef.current.y + dyPercentage;
+            break;
+          case 'bottom-left':
+            newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
+            newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
+            newX = originalPositionRef.current.x + dxPercentage;
+            newY = originalPositionRef.current.y;
+            break;
+          case 'top-left':
+            newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
+            newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
+            newX = originalPositionRef.current.x + dxPercentage;
+            newY = originalPositionRef.current.y + dyPercentage;
+            break;
+        }
+        // Clamp the new position to ensure it doesn't go out of bounds
+        newX = Math.max(Math.min(newX, 100 - newWidth), 0);
+        newY = Math.max(Math.min(newY, 100 - newHeight), 0);
+        
+        // Update the size and position together
+        updateContentOnSlide(presentationId, slides[currentSlideIndex].id, selectedContent.id, {
+            width: newWidth,
+            height: newHeight,
+            position: { x: newX, y: newY },
+        });
+      };
+  
+      const handleMouseUpAfterResize = () => {
+        if (!resizingRef.current) return; // Check ref instead of state
+      
+        resizingRef.current = false; // Update ref to indicate resizing end
+      
+        document.removeEventListener('mousemove', handleMouseMoveDuringResize);
+        document.removeEventListener('mouseup', handleMouseUpAfterResize);
+      };
+
+      document.addEventListener('mousemove', handleMouseMoveDuringResize);
+      document.addEventListener('mouseup', handleMouseUpAfterResize);
   };
 
   // =========================Context menu handler for content

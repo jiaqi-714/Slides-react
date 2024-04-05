@@ -204,7 +204,6 @@ export const PresentationProvider = ({ children }) => {
       addContentToSlide, // Add this line
       updateContentOnSlide,
       deleteContentFromSlide,
-      setPresentations,
     }}>
       {children}
     </PresentationContext.Provider>
