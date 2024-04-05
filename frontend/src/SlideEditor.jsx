@@ -30,6 +30,8 @@ const SlideEditor = ({ presentationId }) => {
   const presentation = presentations.find(p => p.id === presentationId);
   const slides = presentation?.slides || [];
   const presentationsRef = useRef();
+  const deckRef = useRef(null);
+
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
     presentationsRef.current = presentations;
@@ -146,7 +148,7 @@ const SlideEditor = ({ presentationId }) => {
         cursor: 'pointer',
         zIndex: contentItem.layer,
         backgroundColor: 'rgba(255,255,255,0.5)',
-        '&:hover': { boxShadow: '0 0 8px rgba(0, 0, 0, 0.25)' },
+        // '&:hover': { boxShadow: '0 0 8px rgba(0, 0, 0, 0.25)' },
         boxSizing: 'border-box',
         padding: 0,
         margin: 0,
@@ -244,6 +246,7 @@ const SlideEditor = ({ presentationId }) => {
 
   // resize and moving================================
   const [dragging, setDragging] = useState(false);
+  const draggingRef = useRef(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const dragStartRef = useRef({x: 0, y: 0});
 
@@ -256,7 +259,7 @@ const SlideEditor = ({ presentationId }) => {
     if (!content) return;
 
     setSelectedContent(content);
-    setDragging(true);
+    draggingRef.current = true; // Update to use ref
     
     // Bind mousemove and mouseup handlers to the document
     dragStartRef.current = {x: e.clientX, y: e.clientY};
@@ -266,7 +269,8 @@ const SlideEditor = ({ presentationId }) => {
   };
   
   const handleMouseMove = (e) => {
-    if (!dragging) return;
+    if (!draggingRef.current) return; // Use ref to check if dragging
+    if (!selectedContent) return;
     // console.log("dragging")
     // In handleMouseMove, use dragStartRef.current instead of dragStart
     const dx = e.clientX - dragStartRef.current.x;
@@ -302,11 +306,11 @@ const SlideEditor = ({ presentationId }) => {
     );
   };
   const handleMouseUp = (e) => {
-    if (!dragging) return;
+    if (!draggingRef.current) return; // Check if dragging using ref
     updateStore(presentationsRef.current)
-
-    setSelectedContent(null);
-    setDragging(false);
+    // console.log(dragging)
+    draggingRef.current = false; // Reset dragging status using ref
+    // setSelectedContent(null);
     // Unbind mousemove and mouseup handlers from the document
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
@@ -341,10 +345,22 @@ const SlideEditor = ({ presentationId }) => {
 
       const handleMouseMoveDuringResize = (moveEvent) => {
         if (!resizingRef.current) return;
-    
+        console.log(moveEvent.clientX, moveEvent.clientY)
+
+        // Get the bounding rectangle of the deck
+        const deckRect = deckRef.current.getBoundingClientRect();
+
+        // Check if the mouse is within the deck bounds
+        const isInDeckX = moveEvent.clientX >= deckRect.left && moveEvent.clientX <= deckRect.right;
+        const isInDeckY = moveEvent.clientY >= deckRect.top && moveEvent.clientY <= deckRect.bottom;
+
+        if (!isInDeckX || !isInDeckY) {
+          // If the mouse is outside the deck, don't calculate new percentages
+          return;
+        }
         const dxPercentage = ((moveEvent.clientX / deckWidth) * 100) - initialMouseXPercentage;
         const dyPercentage = ((moveEvent.clientY / deckHeight) * 100) - initialMouseYPercentage;
-        
+
         let newWidth, newHeight, newX, newY;
         switch(corner) {
           case 'bottom-right':
@@ -414,12 +430,23 @@ const SlideEditor = ({ presentationId }) => {
     }
   };
 
+  const handleDeckClick = (e) => {
+    // Check if the click is directly on the deck, not bubbled from children
+    if (e.target === e.currentTarget) {
+      setSelectedContent(null); // Deselect any selected content
+      setDragging(false);
+      resizingRef.current = false;
+      // console.log("hhhhhhhhhhhhhhhh")
+    }
+  };
+  
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <SlideSidebar onAddContent={handleAddContent} />
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
       <Box
+        ref={deckRef}
         sx={{
           flex: 1,
           border: '2px dashed #ccc',
@@ -428,6 +455,7 @@ const SlideEditor = ({ presentationId }) => {
           height: {deckHeight}, // Set the desired height
           width: {deckWidth}, // Set the desired width
         }}
+        onClick={handleDeckClick} // Add this handler
       >
         {renderSlideContent()}
       </Box>
