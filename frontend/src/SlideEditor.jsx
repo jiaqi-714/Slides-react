@@ -1,5 +1,5 @@
 //SlideEditor.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Box, Typography, IconButton, Modal, TextField, Button } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -235,9 +235,9 @@ const SlideEditor = ({ presentationId }) => {
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const [selectedContent, setselectedContent] = useState(null);
-  const [dragStart, setDragStart] = useState({x: 0, y: 0});
   const [resizeStart, setResizeStart] = useState({width: 0, height: 0});
-  
+  const dragStartRef = useRef({x: 0, y: 0});
+
   const handleMouseDown = (e, contentId) => {
     // Prevent default action and event bubbling
     e.preventDefault();
@@ -245,14 +245,13 @@ const SlideEditor = ({ presentationId }) => {
   
     const content = slides[currentSlideIndex].content.find(el => el.id === contentId);
     if (!content) return;
-  
+
     setselectedContent(content);
-    setDragStart({x: e.clientX, y: e.clientY});
     setDragging(true);
     
-    // console.log({x: e.clientX, y: e.clientY})
-
     // Bind mousemove and mouseup handlers to the document
+    dragStartRef.current = {x: e.clientX, y: e.clientY};
+    console.log(dragStartRef.current)
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
@@ -260,15 +259,14 @@ const SlideEditor = ({ presentationId }) => {
   const handleMouseMove = (e) => {
     if (!dragging) return;
     
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    console.log(dx, dy)
+    // In handleMouseMove, use dragStartRef.current instead of dragStart
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    // console.log(e, startX, startY, dx, dy, dragging)
     
-    // console.log({x: e.clientX, y: e.clientY} , e.clientX, e.clientY)
     // Calculate new position based on the initial drag start position and the current mouse position
     const moveXPercentage = (dx / deckWidth) * 100;
     const moveYPercentage = (dy / deckHeight) * 100;
-    console.log(moveXPercentage, moveYPercentage)
 
     // Calculate new position percentages based on movement
     const newXPercentage = selectedContent.properties.position.x + moveXPercentage;
