@@ -13,6 +13,8 @@ export const EditPresentation = () => {
   const [editTitleOpen, setEditTitleOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
 
+  // console.log("render EditPresentation")
+
   // Use the PresentationContext
   const { presentations, deletePresentation, updatePresentationTitle } = usePresentations();
 

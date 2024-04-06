@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Box, Button, Typography, TextField, Slider, FormControlLabel, Switch, Grid, Select, MenuItem, InputLabel } from '@mui/material';
 
 const SlideSidebar = ({ onAddContent }) => {
+  // console.log("render Sidebar")
+
   const [elementType, setElementType] = useState('');
   const [contentProperties, setContentProperties] = useState({
     position: { x: 0, y: 0 },

@@ -15,6 +15,7 @@ const deckWidth = 960; // Assuming fixed width for now, but you can dynamically 
 const deckHeight = 700; // Assuming fixed height for now
 
 const SlideEditor = ({ presentationId }) => {
+  console.log("render SlideEditor")
   const {
     presentations,
     addSlideToPresentation,
@@ -32,8 +33,6 @@ const SlideEditor = ({ presentationId }) => {
   const presentationsRef = useRef();
   const slides = presentation?.slides || [];
   const deckRef = useRef(null);
-
-  // console.log(presentationsRef)
 
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
@@ -151,7 +150,7 @@ const SlideEditor = ({ presentationId }) => {
         left: `${contentItem.properties.position.x}%`,
         cursor: 'pointer',
         zIndex: contentItem.properties.layer,
-        backgroundColor: 'rgba(255,255,255,0.5)',
+        backgroundColor: 'rgba(255,255,255,1)',
         boxSizing: 'border-box',
         padding: 0,
         margin: 0,
@@ -196,8 +195,8 @@ const SlideEditor = ({ presentationId }) => {
         };
       }
 
-      const isSelected = selectedContent?.id === contentItem.id;
-
+      const isSelected = selectedContentRef.current?.id === contentItem.id;
+      
       // Define the styles for resize handles
       const resizeHandleStyles = {
         position: 'absolute',
@@ -213,7 +212,9 @@ const SlideEditor = ({ presentationId }) => {
         { id: 'bottom-left', style: { ...resizeHandleStyles, left: '-2.5px', bottom: '-2.5px', cursor: 'nesw-resize' } },
         { id: 'bottom-right', style: { ...resizeHandleStyles, right: '-2.5px', bottom: '-2.5px', cursor: 'nwse-resize' } },
       ] : [];
-    
+      
+      // console.log("re render")
+
       return (
         <Box
           key={contentItem.id}
@@ -250,6 +251,7 @@ const SlideEditor = ({ presentationId }) => {
   const draggingRef = useRef(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const dragStartRef = useRef({x: 0, y: 0});
+  const selectedContentRef = useRef(null);
 
   const handleMouseDown = (e, contentId) => {
     // Prevent default action and event bubbling
@@ -260,6 +262,7 @@ const SlideEditor = ({ presentationId }) => {
     if (!content) return;
 
     setSelectedContent(content);
+    selectedContentRef.current = content;
     // {presentations && console.log("dragging start", presentations[0].slides[0].content[0].properties.position)}
     draggingRef.current = true; // Update to use ref
     
@@ -274,8 +277,8 @@ const SlideEditor = ({ presentationId }) => {
 
     const handleMouseMove = (e, content) => {
       if (!draggingRef.current) return; // Use ref to check if dragging
-      if (!selectedContent) return;
-
+      if (!selectedContentRef.current) return;
+      
       // console.log(content.properties.position)
 
       // In handleMouseMove, use dragStartRef.current instead of dragStart
@@ -307,7 +310,7 @@ const SlideEditor = ({ presentationId }) => {
       updateContentStateOnSlide(
         presentationId,
         slides[currentSlideIndex].id,
-        selectedContent.id,
+        selectedContentRef.current.id,
         { position: { x: clampedX, y: clampedY } }
       );
       // {presentations && console.log("dragging", presentations[0].slides[0].content[0].properties.position)}
@@ -349,7 +352,7 @@ const SlideEditor = ({ presentationId }) => {
     
     resizingRef.current = true; // Use ref to track resizing state
     setSelectedContent(content);
-    
+    selectedContentRef.current = content;
     // Store the initial size
     originalSizeRef.current = { width: content.properties.width, height: content.properties.height };
     finalSizeRef.current = { ...originalSizeRef.current }; // Initialize finalSizeRef with the original size
@@ -407,7 +410,7 @@ const SlideEditor = ({ presentationId }) => {
       newY = Math.max(Math.min(newY, 100 - newHeight), 0);
   
       // Update the size and position
-      updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContent.id, {
+      updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContentRef.current.id, {
         width: newWidth,
         height: newHeight,
         position: { x: newX, y: newY },
@@ -449,6 +452,7 @@ const SlideEditor = ({ presentationId }) => {
     // Check if the click is directly on the deck, not bubbled from children
     if (e.target === e.currentTarget) {
       setSelectedContent(null); // Deselect any selected content
+      selectedContentRef.current = null;
       resizingRef.current = false;
       draggingRef.current = false; // Reset dragging status using ref
       console.log(e.clientX, e.clientY)
