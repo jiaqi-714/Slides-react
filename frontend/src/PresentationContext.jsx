@@ -12,7 +12,6 @@ const backendURL = `http://localhost:${config.BACKEND_PORT}/store`; // Use the p
 
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
-
   const { isAuthenticated } = useAuth(); // Destructure to get login function from the context
 
   useEffect(() => {
@@ -84,8 +83,8 @@ export const PresentationProvider = ({ children }) => {
     await updateStore(updatedPresentations);
   };
 
-  // Helper function to update presentations in both state and backend
-  const updateStore = async (updatedPresentations) => {
+  const updateStore = async (updatedPresentations = presentations) => {
+    // If updatedPresentations is not provided, it defaults to the presentations state
     setPresentations(updatedPresentations);
     await fetch(backendURL, {
       method: 'PUT',
@@ -95,7 +94,8 @@ export const PresentationProvider = ({ children }) => {
       },
       body: JSON.stringify({ store: { presentations: updatedPresentations } }),
     });
-  };
+    // Optionally, you can log or handle the response here
+  };  
 
   const deleteSlide = async (presentationId, slideId) => {
     // Find the presentation and remove the slide
@@ -236,6 +236,7 @@ export const PresentationProvider = ({ children }) => {
       deleteContentFromSlide,
       updateContentStateOnSlide,
       updateStore,
+      setPresentations,
     }}>
       {children}
     </PresentationContext.Provider>

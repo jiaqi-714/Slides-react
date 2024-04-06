@@ -24,19 +24,23 @@ const SlideEditor = ({ presentationId }) => {
     deleteContentFromSlide,
     updateContentStateOnSlide,
     updateStore,
+    setPresentations,
   } = usePresentations();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const presentation = presentations.find(p => p.id === presentationId);
-  const slides = presentation?.slides || [];
   const presentationsRef = useRef();
+  const slides = presentation?.slides || [];
   const deckRef = useRef(null);
+
+  // console.log(presentationsRef)
 
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
     presentationsRef.current = presentations;
-    // console.log(presentationsRef.current)
+    // {presentations && console.log("presentations changed", presentations[0].slides[0].content[0].properties.position)}
   }, [presentations]);
+
 
   const handleAddSlide = async () => {
     await addSlideToPresentation(presentationId);
@@ -146,23 +150,21 @@ const SlideEditor = ({ presentationId }) => {
         top: `${contentItem.properties.position.y}%`,
         left: `${contentItem.properties.position.x}%`,
         cursor: 'pointer',
-        zIndex: contentItem.layer,
+        zIndex: contentItem.properties.layer,
         backgroundColor: 'rgba(255,255,255,0.5)',
-        // '&:hover': { boxShadow: '0 0 8px rgba(0, 0, 0, 0.25)' },
         boxSizing: 'border-box',
         padding: 0,
         margin: 0,
         display: 'inline-block',
         overflow: 'hidden',
-      };
-  
-      // Apply border and padding for non-image content
-      if (contentItem.type !== 'IMAGE') {
-        boxStyles = { ...boxStyles, 
-        border: '1px solid grey', 
-        padding: 1, 
+        border: '1px solid grey',
         width: `${contentItem.properties.width}%`,
-        height: `${contentItem.properties.height}%`,};
+        height: `${contentItem.properties.height}%`,
+      };
+
+      // Apply padding for non-image content
+      if (contentItem.type !== 'IMAGE') {
+        boxStyles.padding = 1;
       }
 
       // Apply border and padding for CODE content
@@ -245,7 +247,6 @@ const SlideEditor = ({ presentationId }) => {
   };
 
   // resize and moving================================
-  const [dragging, setDragging] = useState(false);
   const draggingRef = useRef(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const dragStartRef = useRef({x: 0, y: 0});
@@ -259,62 +260,76 @@ const SlideEditor = ({ presentationId }) => {
     if (!content) return;
 
     setSelectedContent(content);
+    // {presentations && console.log("dragging start", presentations[0].slides[0].content[0].properties.position)}
     draggingRef.current = true; // Update to use ref
     
     // Bind mousemove and mouseup handlers to the document
     dragStartRef.current = {x: e.clientX, y: e.clientY};
-    console.log(dragStartRef.current)
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+
+    // Create a closure that captures contentId and passes it to handleMouseMove
+    const mouseMoveWithContentId = (event) => handleMouseMove(event, content);
+    
+    // Similarly, for mouse up, if you need contentId
+    const mouseUpWithContentId = (event) => handleMouseUp(event);
+
+    const handleMouseMove = (e, content) => {
+      if (!draggingRef.current) return; // Use ref to check if dragging
+      if (!selectedContent) return;
+
+      // console.log(content.properties.position)
+
+      // In handleMouseMove, use dragStartRef.current instead of dragStart
+      const dx = (e.clientX - dragStartRef.current.x)
+      const dy = (e.clientY - dragStartRef.current.y)
+      // console.log("dx, dy:", dx, dy, dragStartRef.current.x, dragStartRef.current.y);
+      
+      // Calculate new position based on the initial drag start position and the current mouse position
+      const moveXPercentage = (dx / deckWidth) * 100;
+      const moveYPercentage = (dy / deckHeight) * 100;
+  
+      // Assuming you have the content's width and height in percentages as contentWidthPercentage and contentHeightPercentage
+      const contentWidthPercentage = content.properties.width;
+      const contentHeightPercentage = content.properties.height;
+  
+      // Calculate new position percentages based on movement
+      const newXPercentage = content.properties.position.x + moveXPercentage;
+      const newYPercentage = content.properties.position.y + moveYPercentage;
+
+      // Clamp the new X position to ensure the content doesn't go beyond the right slide boundary
+      const maxPossibleX = 100 - contentWidthPercentage; // Subtract content width from 100% to get the maximum possible X
+      const clampedX = Math.min(Math.max(newXPercentage, 0), maxPossibleX);
+  
+      // Clamp the new Y position to ensure the content doesn't go beyond the bottom slide boundary
+      const maxPossibleY = 100 - contentHeightPercentage; // Subtract content height from 100% to get the maximum possible Y
+      const clampedY = Math.min(Math.max(newYPercentage, 0), maxPossibleY);
+  
+      // Update position using the clamped values
+      updateContentStateOnSlide(
+        presentationId,
+        slides[currentSlideIndex].id,
+        selectedContent.id,
+        { position: { x: clampedX, y: clampedY } }
+      );
+      // {presentations && console.log("dragging", presentations[0].slides[0].content[0].properties.position)}
+    };
+  
+    const handleMouseUp = (e) => {
+      if (!draggingRef.current) return; // Check if dragging using ref
+
+      draggingRef.current = false; // Reset dragging status using ref
+      // {presentations && console.log("dragging stop", presentations[0].slides[0].content[0].properties.position)}
+      updateStore(presentationsRef.current)
+
+      // Unbind mousemove and mouseup handlers from the document
+      document.removeEventListener('mousemove', mouseMoveWithContentId);
+      document.removeEventListener('mouseup', mouseUpWithContentId);
+    };
+    
+    // if (selectedContent) console.log("try to add handler", content.properties.position)
+    document.addEventListener('mousemove', mouseMoveWithContentId);
+    document.addEventListener('mouseup', mouseUpWithContentId);
   };
   
-  const handleMouseMove = (e) => {
-    if (!draggingRef.current) return; // Use ref to check if dragging
-    if (!selectedContent) return;
-    // console.log("dragging")
-    // In handleMouseMove, use dragStartRef.current instead of dragStart
-    const dx = e.clientX - dragStartRef.current.x;
-    const dy = e.clientY - dragStartRef.current.y;
-    // console.log(e, startX, startY, dx, dy, dragging)
-    
-    // Calculate new position based on the initial drag start position and the current mouse position
-    const moveXPercentage = (dx / deckWidth) * 100;
-    const moveYPercentage = (dy / deckHeight) * 100;
-
-    // Assuming you have the content's width and height in percentages as contentWidthPercentage and contentHeightPercentage
-    const contentWidthPercentage = selectedContent.properties.width;
-    const contentHeightPercentage = selectedContent.properties.height;
-
-    // Calculate new position percentages based on movement
-    const newXPercentage = selectedContent.properties.position.x + moveXPercentage;
-    const newYPercentage = selectedContent.properties.position.y + moveYPercentage;
-
-    // Clamp the new X position to ensure the content doesn't go beyond the right slide boundary
-    const maxPossibleX = 100 - contentWidthPercentage; // Subtract content width from 100% to get the maximum possible X
-    const clampedX = Math.min(Math.max(newXPercentage, 0), maxPossibleX);
-
-    // Clamp the new Y position to ensure the content doesn't go beyond the bottom slide boundary
-    const maxPossibleY = 100 - contentHeightPercentage; // Subtract content height from 100% to get the maximum possible Y
-    const clampedY = Math.min(Math.max(newYPercentage, 0), maxPossibleY);
-
-    // Update position using the clamped values
-    updateContentStateOnSlide(
-      presentationId,
-      slides[currentSlideIndex].id,
-      selectedContent.id,
-      { position: { x: clampedX, y: clampedY } }
-    );
-  };
-  const handleMouseUp = (e) => {
-    if (!draggingRef.current) return; // Check if dragging using ref
-    updateStore(presentationsRef.current)
-    // console.log(dragging)
-    draggingRef.current = false; // Reset dragging status using ref
-    // setSelectedContent(null);
-    // Unbind mousemove and mouseup handlers from the document
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  };
 
   //============================
   
@@ -326,92 +341,92 @@ const SlideEditor = ({ presentationId }) => {
 
 
   const handleResizeMouseDown = (e, contentId, corner) => {
-      e.stopPropagation();
-      e.preventDefault();
-      
-      const content = slides[currentSlideIndex].content.find(item => item.id === contentId);
-      if (!content) return;
-      
-      resizingRef.current = true; // Use ref to track resizing state
-      setSelectedContent(content);
-      
-      // Store the initial size
-      originalSizeRef.current = { width: content.properties.width, height: content.properties.height };
-      finalSizeRef.current = { ...originalSizeRef.current }; // Initialize finalSizeRef with the original size
-      originalPositionRef.current = { ...content.properties.position };
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const content = slides[currentSlideIndex].content.find(item => item.id === contentId);
+    if (!content) return;
+    
+    resizingRef.current = true; // Use ref to track resizing state
+    setSelectedContent(content);
+    
+    // Store the initial size
+    originalSizeRef.current = { width: content.properties.width, height: content.properties.height };
+    finalSizeRef.current = { ...originalSizeRef.current }; // Initialize finalSizeRef with the original size
+    originalPositionRef.current = { ...content.properties.position };
 
-      const initialMouseXPercentage = (e.clientX / deckWidth) * 100;
-      const initialMouseYPercentage = (e.clientY / deckHeight) * 100;
+    const initialMouseXPercentage = (e.clientX / deckWidth) * 100;
+    const initialMouseYPercentage = (e.clientY / deckHeight) * 100;
 
-      const handleMouseMoveDuringResize = (moveEvent) => {
-        if (!resizingRef.current) return;
-        console.log(moveEvent.clientX, moveEvent.clientY)
-
-        // Get the bounding rectangle of the deck
-        const deckRect = deckRef.current.getBoundingClientRect();
-
-        // Check if the mouse is within the deck bounds
-        const isInDeckX = moveEvent.clientX >= deckRect.left && moveEvent.clientX <= deckRect.right;
-        const isInDeckY = moveEvent.clientY >= deckRect.top && moveEvent.clientY <= deckRect.bottom;
-
-        if (!isInDeckX || !isInDeckY) {
-          // If the mouse is outside the deck, don't calculate new percentages
-          return;
-        }
-        const dxPercentage = ((moveEvent.clientX / deckWidth) * 100) - initialMouseXPercentage;
-        const dyPercentage = ((moveEvent.clientY / deckHeight) * 100) - initialMouseYPercentage;
-
-        let newWidth, newHeight, newX, newY;
-        switch(corner) {
-          case 'bottom-right':
-            newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
-            newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
-            newX = originalPositionRef.current.x;
-            newY = originalPositionRef.current.y;
-            break;
-          case 'top-right':
-            newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
-            newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
-            newX = originalPositionRef.current.x;
-            newY = originalPositionRef.current.y + dyPercentage;
-            break;
-          case 'bottom-left':
-            newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
-            newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
-            newX = originalPositionRef.current.x + dxPercentage;
-            newY = originalPositionRef.current.y;
-            break;
-          case 'top-left':
-            newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
-            newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
-            newX = originalPositionRef.current.x + dxPercentage;
-            newY = originalPositionRef.current.y + dyPercentage;
-            break;
-        }
-        // Clamp the new position to ensure it doesn't go out of bounds
-        newX = Math.max(Math.min(newX, 100 - newWidth), 0);
-        newY = Math.max(Math.min(newY, 100 - newHeight), 0);
-        
-        // Update the size and position together
-        updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContent.id, {
-            width: newWidth,
-            height: newHeight,
-            position: { x: newX, y: newY },
-        });
-      };
+    const handleMouseMoveDuringResize = (moveEvent) => {
+      if (!resizingRef.current) return;
   
-      const handleMouseUpAfterResize = () => {
-        if (!resizingRef.current) return; // Check ref instead of state
+      const deckRect = deckRef.current.getBoundingClientRect();
+      const isInDeckX = moveEvent.clientX >= deckRect.left && moveEvent.clientX <= deckRect.right;
+      const isInDeckY = moveEvent.clientY >= deckRect.top && moveEvent.clientY <= deckRect.bottom;
+      if (!isInDeckX || !isInDeckY) return;
+  
+      // Calculate the change in mouse position as a percentage of deck dimensions
+      const dxPercentage = ((moveEvent.clientX / deckWidth) * 100) - initialMouseXPercentage;
+      const dyPercentage = ((moveEvent.clientY / deckHeight) * 100) - initialMouseYPercentage;
+  
+      // Determine the original aspect ratio
+      const aspectRatio = originalSizeRef.current.width / originalSizeRef.current.height;
+  
+      let newWidth, newHeight, newX, newY;
+      switch(corner) {
+        case 'bottom-right':
+          // Calculate new width or height while maintaining aspect ratio
+          newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
+          newHeight = newWidth / aspectRatio; // Calculate new height based on aspect ratio
+          newX = originalPositionRef.current.x;
+          newY = originalPositionRef.current.y;
+          break;
+        case 'top-right':
+          newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
+          newHeight = newWidth / aspectRatio; // Maintain aspect ratio
+          newX = originalPositionRef.current.x;
+          newY = originalPositionRef.current.y - (newHeight - originalSizeRef.current.height); // Adjust Y to compensate for height increase
+          break;
+        case 'bottom-left':
+          newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
+          newWidth = newHeight * aspectRatio; // Maintain aspect ratio
+          newX = originalPositionRef.current.x - (newWidth - originalSizeRef.current.width); // Adjust X to compensate for width increase
+          newY = originalPositionRef.current.y;
+          break;
+        case 'top-left':
+          newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
+          newWidth = newHeight * aspectRatio; // Maintain aspect ratio
+          newX = originalPositionRef.current.x - (newWidth - originalSizeRef.current.width); // Adjust X to compensate
+          newY = originalPositionRef.current.y - (newHeight - originalSizeRef.current.height); // Adjust Y to compensate
+          break;
+      }
+  
+      // Clamp new position to prevent out-of-bounds
+      newX = Math.max(Math.min(newX, 100 - newWidth), 0);
+      newY = Math.max(Math.min(newY, 100 - newHeight), 0);
+  
+      // Update the size and position
+      updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContent.id, {
+        width: newWidth,
+        height: newHeight,
+        position: { x: newX, y: newY },
+      });
+    };
+    
+  
+    const handleMouseUpAfterResize = () => {
+      if (!resizingRef.current) return; // Check ref instead of state
 
-        updateStore(presentationsRef.current)
-        resizingRef.current = false; // Update ref to indicate resizing end
-      
-        document.removeEventListener('mousemove', handleMouseMoveDuringResize);
-        document.removeEventListener('mouseup', handleMouseUpAfterResize);
-      };
+      updateStore(presentationsRef.current)
+      resizingRef.current = false; // Update ref to indicate resizing end
+    
+      document.removeEventListener('mousemove', handleMouseMoveDuringResize);
+      document.removeEventListener('mouseup', handleMouseUpAfterResize);
+    };
 
-      document.addEventListener('mousemove', handleMouseMoveDuringResize);
-      document.addEventListener('mouseup', handleMouseUpAfterResize);
+    document.addEventListener('mousemove', handleMouseMoveDuringResize);
+    document.addEventListener('mouseup', handleMouseUpAfterResize);
   };
 
   // =========================Context menu handler for content
@@ -434,8 +449,9 @@ const SlideEditor = ({ presentationId }) => {
     // Check if the click is directly on the deck, not bubbled from children
     if (e.target === e.currentTarget) {
       setSelectedContent(null); // Deselect any selected content
-      setDragging(false);
       resizingRef.current = false;
+      draggingRef.current = false; // Reset dragging status using ref
+      console.log(e.clientX, e.clientY)
       // console.log("hhhhhhhhhhhhhhhh")
     }
   };
