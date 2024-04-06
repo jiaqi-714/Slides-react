@@ -1,11 +1,13 @@
 // SlideSidebar.jsx
-import React, { useState } from 'react';
-import { Box, Button, Typography, TextField, Slider, FormControlLabel, Switch, Grid, Select, MenuItem, InputLabel } from '@mui/material';
+import React, { useState, useContext, useEffect} from 'react';
+import { Box, Button, Typography, TextField, Slider, FormControlLabel, Switch, Grid } from '@mui/material';
+// Import your context if using context for state management
+import { usePresentations } from './PresentationContext';
 
-const SlideSidebar = ({ onAddContent }) => {
-  // console.log("render Sidebar")
-
+const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, presentation}) => {
+  const { presentations, addContentToSlide, updateContentOnSlide } = usePresentations();
   const [elementType, setElementType] = useState('');
+  const [showPropertiesInput, setShowPropertiesInput] = useState(false);
   const [contentProperties, setContentProperties] = useState({
     position: { x: 0, y: 0 },
     size: 50, // Unified size property as a percentage for all element types
@@ -24,10 +26,41 @@ const SlideSidebar = ({ onAddContent }) => {
     // Code properties
     code: '',
   });
+  
+  useEffect(() => {
+    if (editingContent) {
+      setElementType(editingContent.type);
+      setContentProperties(editingContent.properties);
+    } else {
+      resetForm();
+    }
+    setShowPropertiesInput(true)
+  }, [editingContent]);
 
-  const handleAddContent = () => {
-    onAddContent(elementType, contentProperties);
-    // Reset state after adding content
+  const handleChange = (name, value) => {
+    setContentProperties(prev => ({
+      ...prev,
+      [name]: typeof value === 'object' && value !== null ? { ...prev[name], ...value } : value
+    }));
+  };
+  
+  // Handle Add or Update based on editing mode
+  const handleSaveContent = async () => {
+    const slideId = presentation.slides[currentSlideIndex].id;
+
+    if (editingContent) {
+      // Update existing content
+      console.log(presentation.id, slideId, editingContent.id, elementType, contentProperties);
+      await updateContentOnSlide(presentation.id, slideId, editingContent.id, { type: elementType, properties: contentProperties });
+    } else {
+      // Add new content
+      await addContentToSlide(presentation.id, slideId, { type: elementType, properties: contentProperties });
+    }
+    setEditingContent(null); // Exit editing mode
+    resetForm();
+  };
+
+  const resetForm = () => {
     setElementType('');
     setContentProperties({
       position: { x: 0, y: 0 },
@@ -46,286 +79,169 @@ const SlideSidebar = ({ onAddContent }) => {
     });
   };
 
-  const handleChange = (name, value) => {
-    setContentProperties(prev => ({
-      ...prev,
-      [name]: typeof value === 'object' && value !== null ? { ...prev[name], ...value } : value
-    }));
-  };
-  
   const renderPropertiesInput = () => {
+    // Define input fields for each type of content specifically
+    const textFields = (
+      <>
+        <TextField
+          label="Text"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={contentProperties.text}
+          onChange={(e) => handleChange('text', e.target.value)}
+        />
+      </>
+    );
+  
+    const imageFields = (
+      <>
+        <TextField
+          label="Image URL/Base64"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={contentProperties.imageUrl}
+          onChange={(e) => handleChange('imageUrl', e.target.value)}
+        />
+        <TextField
+          label="Image Alt Text"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={contentProperties.imageAlt}
+          onChange={(e) => handleChange('imageAlt', e.target.value)}
+        />
+      </>
+    );
+  
+    const videoFields = (
+      <>
+        <TextField
+          label="Video URL"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={contentProperties.videoUrl}
+          onChange={(e) => handleChange('videoUrl', e.target.value)}
+        />
+      </>
+    );
+  
+    const codeFields = (
+      <>
+        <TextField
+          label="Code"
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={4}
+          margin="normal"
+          value={contentProperties.code}
+          onChange={(e) => handleChange('code', e.target.value)}
+        />
+      </>
+    );
+  
+    // Dynamically render input fields based on the selected element type
+    let specificFields;
     switch (elementType) {
       case 'TEXT':
-        return (
-          <>
-            <TextField
-              label="Text"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={contentProperties.text}
-              onChange={(e) => handleChange('text', e.target.value)}
-            />
-            <Typography gutterBottom>Font Size (em)</Typography>
-            <Slider
-              value={contentProperties.fontSize}
-              step={0.1}
-              min={0.5}
-              max={3}
-              marks
-              valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('fontSize', newValue)}
-            />
-            <TextField
-              label="Color"
-              type="color"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={contentProperties.color}
-              onChange={(e) => handleChange('color', e.target.value)}
-            />
-            <>
-              <Typography gutterBottom>Width (%)</Typography>
-              <Slider
-                value={contentProperties.width}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('width', newValue)}
-              />
-              <Typography gutterBottom>Height (%)</Typography>
-              <Slider
-                value={contentProperties.height}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('height', newValue)}
-              />
-            </>
-            <Button variant="contained" color="primary" onClick={handleAddContent}>Add Text to Slide</Button>
-            <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
-          </>
-        );
+        specificFields = textFields;
+        break;
       case 'IMAGE':
-        return (
-          <>
-            <TextField
-              label="Image URL/Base64"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={contentProperties.imageUrl}
-              onChange={(e) => handleChange('imageUrl', e.target.value)}
-            />
-            <TextField
-              label="Image Alt Text"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={contentProperties.imageAlt}
-              onChange={(e) => handleChange('imageAlt', e.target.value)}
-            />
-            <Typography gutterBottom>Image Size (%)</Typography>
-            <Slider
-              value={contentProperties.size}
-              step={1}
-              min={1}
-              max={100}
-              marks
-              valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('size', newValue)}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={contentProperties.isBase64}
-                  onChange={(e) => handleChange('isBase64', e.target.checked)}
-                />
-              }
-              label="Is Base64"
-            />
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <TextField
-                  label="X Position (%)"
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  value={contentProperties.position.x}
-                  onChange={(e) => handleChange('position', { ...contentProperties.position, x: Number(e.target.value) })}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Y Position (%)"
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  value={contentProperties.position.y}
-                  onChange={(e) => handleChange('position', { ...contentProperties.position, y: Number(e.target.value) })}
-                />
-              </Grid>
-            </Grid>
-            <>
-              <Typography gutterBottom>Width (%)</Typography>
-              <Slider
-                value={contentProperties.width}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('width', newValue)}
-              />
-              <Typography gutterBottom>Height (%)</Typography>
-              <Slider
-                value={contentProperties.height}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('height', newValue)}
-              />
-            </>
-            <Button variant="contained" color="primary" onClick={handleAddContent}>Add Image to Slide</Button>
-          </>
-        );
+        specificFields = imageFields;
+        break;
       case 'VIDEO':
-        return (
-          <>
-            <TextField
-              label="Video URL"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={contentProperties.videoUrl}
-              onChange={(e) => handleChange('videoUrl', e.target.value)}
-            />
-            {/* <Typography gutterBottom>Video Size (%)</Typography>
-            <Slider
-              value={contentProperties.size}
-              step={1}
-              min={1}
-              max={100}
-              marks
-              valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('size', newValue)}
-            /> */}
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={contentProperties.autoPlay}
-                  onChange={(e) => handleChange('autoPlay', e.target.checked)}
-                />
-              }
-              label="Auto-Play"
-            />
-            <>
-              <Typography gutterBottom>Width (%)</Typography>
-              <Slider
-                value={contentProperties.width}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('width', newValue)}
-              />
-              <Typography gutterBottom>Height (%)</Typography>
-              <Slider
-                value={contentProperties.height}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('height', newValue)}
-              />
-            </>
-            <Button variant="contained" color="primary" onClick={handleAddContent}>Add Video to Slide</Button>
-            <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
-          </>
-        );
+        specificFields = videoFields;
+        break;
       case 'CODE':
-        return (
-          <>
-            <TextField
-              label="Code"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={4}
-              margin="normal"
-              value={contentProperties.code}
-              onChange={(e) => handleChange('code', e.target.value)}
-            />
-            <Typography gutterBottom>Font Size (em)</Typography>
-            <Slider
-              value={contentProperties.fontSize}
-              step={0.1}
-              min={0.5}
-              max={3}
-              marks
-              valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('fontSize', newValue)}
-            />
-            {/* <Typography gutterBottom>Size (%)</Typography>
-            <Slider
-              value={contentProperties.size}
-              step={1}
-              min={1}
-              max={100}
-              marks
-              valueLabelDisplay="auto"
-              onChange={(e, newValue) => handleChange('size', newValue)}
-            /> */}
-            <>
-              <Typography gutterBottom>Width (%)</Typography>
-              <Slider
-                value={contentProperties.width}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('width', newValue)}
-              />
-              <Typography gutterBottom>Height (%)</Typography>
-              <Slider
-                value={contentProperties.height}
-                step={1}
-                min={1}
-                max={100}
-                marks
-                valueLabelDisplay="auto"
-                onChange={(e, newValue) => handleChange('height', newValue)}
-              />
-            </>
-            <Button variant="contained" color="primary" onClick={handleAddContent}>Add Code to Slide</Button>
-            <Button variant="text" color="secondary" onClick={() => setElementType('')}>Back</Button>
-          </>
-        );
-        // Implement cases for other types like VIDEO if needed
+        specificFields = codeFields;
+        break;
       default:
-        return null;
+        specificFields = null;
     }
+  
+    // Only display size sliders when not in editing mode
+    const sizeSliders = !editingContent && (
+      <>
+        <Typography gutterBottom>Width (%)</Typography>
+        <Slider
+          value={contentProperties.width}
+          step={1}
+          min={1}
+          max={100}
+          marks
+          valueLabelDisplay="auto"
+          onChange={(e, newValue) => handleChange('width', newValue)}
+        />
+        <Typography gutterBottom>Height (%)</Typography>
+        <Slider
+          value={contentProperties.height}
+          step={1}
+          min={1}
+          max={100}
+          marks
+          valueLabelDisplay="auto"
+          onChange={(e, newValue) => handleChange('height', newValue)}
+        />
+      </>
+    );
+  
+    return (
+      <>
+        {specificFields}
+        {sizeSliders}
+      </>
+    );
+  };
+
+  // Modified handleSetElementType function to also show properties input
+  const handleSetElementType = (type) => {
+    setEditingContent(null);
+    console.log(type)
+    setElementType(type);
+    setShowPropertiesInput(true);
+  };
+
+  // Wrap original handleSaveContent in another function to hide properties input after save
+  const handleSaveAndHideProperties = async () => {
+    await handleSaveContent();
+    setShowPropertiesInput(false);
+  };
+
+  // Function to hide properties input without cancelling edit mode
+  const handleHidePropertiesInput = () => {
+    setShowPropertiesInput(false);
   };
 
   return (
     <Box sx={{ p: 2, width: 250, borderRight: '1px solid #ccc', height: '100vh' }}>
-      <Button onClick={() => setElementType('TEXT')}>Text</Button>
-      <Button onClick={() => setElementType('IMAGE')}>Image</Button>
-      <Button onClick={() => setElementType('VIDEO')}>Video</Button>
-      <Button onClick={() => setElementType('CODE')}>Code</Button>
-      {renderPropertiesInput()}
+      <Button onClick={() => handleSetElementType('TEXT')}>Text</Button>
+      <Button onClick={() => handleSetElementType('IMAGE')}>Image</Button>
+      <Button onClick={() => handleSetElementType('VIDEO')}>Video</Button>
+      <Button onClick={() => handleSetElementType('CODE')}>Code</Button>
+      {showPropertiesInput && (
+        <>
+          {renderPropertiesInput()}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleSaveAndHideProperties}
+            >
+              {editingContent ? 'Update Content' : 'Add Content'}
+            </Button>
+            <Button 
+              variant="outlined" 
+              onClick={handleHidePropertiesInput}
+            >
+              Back
+            </Button>
+          </Box>
+        </>
+      )}
     </Box>
   );
-};
-
+}
 export default SlideSidebar;

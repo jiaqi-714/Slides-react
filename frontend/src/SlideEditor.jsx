@@ -15,7 +15,7 @@ const deckWidth = 960; // Assuming fixed width for now, but you can dynamically 
 const deckHeight = 700; // Assuming fixed height for now
 
 const SlideEditor = ({ presentationId }) => {
-  console.log("render SlideEditor")
+  // console.log("render SlideEditor")
   const {
     presentations,
     addSlideToPresentation,
@@ -27,12 +27,13 @@ const SlideEditor = ({ presentationId }) => {
     updateStore,
     setPresentations,
   } = usePresentations();
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
+  
   const presentation = presentations.find(p => p.id === presentationId);
   const presentationsRef = useRef();
   const slides = presentation?.slides || [];
   const deckRef = useRef(null);
+  const [editingContent, setEditingContent] = useState(null); // State to track editing content
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
@@ -223,7 +224,7 @@ const SlideEditor = ({ presentationId }) => {
             ...(isSelected && { boxShadow: "0 0 0 2px blue" }), // Optional: Highlight the selected box
           }}
           onMouseDown={(e) => handleMouseDown(e, contentItem.id)}
-          onDoubleClick={() => console.log('Edit content properties')}
+          onDoubleClick={() => handleDoubleClickOnContent(contentItem.id)}
           onContextMenu={(e) => handleContextMenu(e, contentItem.id)}
         >
           {contentItem.type === 'TEXT' && (
@@ -311,7 +312,7 @@ const SlideEditor = ({ presentationId }) => {
         presentationId,
         slides[currentSlideIndex].id,
         selectedContentRef.current.id,
-        { position: { x: clampedX, y: clampedY } }
+        { properties: {position: { x: clampedX, y: clampedY }} }
       );
       // {presentations && console.log("dragging", presentations[0].slides[0].content[0].properties.position)}
     };
@@ -332,16 +333,13 @@ const SlideEditor = ({ presentationId }) => {
     document.addEventListener('mousemove', mouseMoveWithContentId);
     document.addEventListener('mouseup', mouseUpWithContentId);
   };
-  
 
   //============================
-  
   // Add to your component state
   const originalPositionRef = useRef({ x: 0, y: 0 });
   const resizingRef = useRef(false);
   const originalSizeRef = useRef({ width: 0, height: 0 });
   const finalSizeRef = useRef({ width: 0, height: 0 }); // Ref to track the final size after resizing
-
 
   const handleResizeMouseDown = (e, contentId, corner) => {
     e.stopPropagation();
@@ -398,10 +396,14 @@ const SlideEditor = ({ presentationId }) => {
           newY = originalPositionRef.current.y;
           break;
         case 'top-left':
-          newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
-          newWidth = newHeight * aspectRatio; // Maintain aspect ratio
-          newX = originalPositionRef.current.x - (newWidth - originalSizeRef.current.width); // Adjust X to compensate
-          newY = originalPositionRef.current.y - (newHeight - originalSizeRef.current.height); // Adjust Y to compensate
+          // Calculate new sizes inversely proportional to the drag directions
+          newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
+          newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
+        
+          // Adjust the X and Y position to move in accordance with the size adjustments
+          // As we're reducing the width/height (by dragging towards the top-left), we need to move the position left/upwards
+          newX = originalPositionRef.current.x + (originalSizeRef.current.width - newWidth);
+          newY = originalPositionRef.current.y + (originalSizeRef.current.height - newHeight);
           break;
       }
   
@@ -411,9 +413,9 @@ const SlideEditor = ({ presentationId }) => {
   
       // Update the size and position
       updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContentRef.current.id, {
-        width: newWidth,
+        properties: {width: newWidth,
         height: newHeight,
-        position: { x: newX, y: newY },
+        position: { x: newX, y: newY }}
       });
     };
     
@@ -460,9 +462,19 @@ const SlideEditor = ({ presentationId }) => {
     }
   };
   
+  const handleDoubleClickOnContent = (contentId) => {
+    const contentToEdit = slides[currentSlideIndex].content.find(content => content.id === contentId);
+    setEditingContent(contentToEdit);
+  };
+
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      <SlideSidebar onAddContent={handleAddContent} />
+      <SlideSidebar
+        editingContent={editingContent}
+        setEditingContent={setEditingContent}
+        currentSlideIndex={currentSlideIndex}
+        presentation={presentation}
+      />
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
       <Box

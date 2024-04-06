@@ -139,7 +139,7 @@ export const PresentationProvider = ({ children }) => {
   };
 
   
-  const updateContentStateOnSlide = (presentationId, slideId, contentId, newProperties) => {
+  const updateContentStateOnSlide = (presentationId, slideId, contentId, updates) => {
     let updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         const updatedSlides = presentation.slides.map(slide => {
@@ -149,9 +149,11 @@ export const PresentationProvider = ({ children }) => {
               if (contentPiece.id === contentId) {
                 return {
                   ...contentPiece,
+                  ...updates,
                   properties: {
                     ...contentPiece.properties,
-                    ...newProperties
+                    // Ensure that new properties from updates are spread last so they overwrite existing properties
+                    ...updates.properties
                   }
                 };
               }
@@ -169,19 +171,22 @@ export const PresentationProvider = ({ children }) => {
     return updatedPresentations;
   };
 
-  const updateContentOnSlide = async (presentationId, slideId, contentId, newProperties) => {
+  const updateContentOnSlide = async (presentationId, slideId, contentId, updates) => {
     let updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         const updatedSlides = presentation.slides.map(slide => {
           if (slide.id === slideId) {
-            // Map through content to find the specific piece to update
             const updatedContent = slide.content.map(contentPiece => {
               if (contentPiece.id === contentId) {
+                // Here, spread the existing content piece, then spread the updates over it
+                // This allows for 'type' and 'properties' (and potentially other fields) to be updated
                 return {
                   ...contentPiece,
+                  ...updates,
                   properties: {
                     ...contentPiece.properties,
-                    ...newProperties
+                    // Ensure that new properties from updates are spread last so they overwrite existing properties
+                    ...updates.properties
                   }
                 };
               }
@@ -195,9 +200,9 @@ export const PresentationProvider = ({ children }) => {
       }
       return presentation;
     });
-
-  // Update state and backend
-  await updateStore(updatedPresentations);
+  
+    // Update state and backend
+    await updateStore(updatedPresentations);
   };
 
 
