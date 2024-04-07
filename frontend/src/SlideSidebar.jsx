@@ -1,6 +1,6 @@
 // SlideSidebar.jsx
 import React, { useState, useContext, useEffect} from 'react';
-import { Box, Button, Typography, TextField, Slider, MenuItem, Drawer} from '@mui/material';
+import { Box, Button, Typography, TextField, Slider, MenuItem, Drawer, FormControlLabel, Switch} from '@mui/material';
 // Import your context if using context for state management
 import { usePresentations } from './PresentationContext';
 
@@ -157,6 +157,16 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           value={contentProperties.videoUrl}
           onChange={(e) => handleChange('videoUrl', e.target.value)}
         />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={contentProperties.autoPlay}
+              onChange={(e) => handleChange('autoPlay', e.target.checked)}
+              name="autoPlay"
+            />
+          }
+          label="Auto Play"
+        />
       </>
     );
   
@@ -257,7 +267,14 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
   };
 
   return (
-    <Box sx={{ ...sx, p: 2, borderRight: '1px solid #ccc'}}>
+    <Box sx={{
+      ...sx,
+      p: 1,
+      paddingRight: 2,
+      borderRight: '1px solid #ccc',
+      boxSizing: 'border-box', // This ensures padding is included in the height calculation
+      overflow: 'clip' // This adds scroll inside the box if content exceeds its height
+    }}>
       <Button onClick={() => handleSetElementType('TEXT')}>Text</Button>
       <Button onClick={() => handleSetElementType('IMAGE')}>Image</Button>
       <Button onClick={() => handleSetElementType('VIDEO')}>Video</Button>

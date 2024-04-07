@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Box, Typography, Modal, TextField, IconButton } from '@mui/material';
 import { usePresentations } from './PresentationContext'; // Ensure correct path
-import SlideEditor from './SlideEditor';
-import MainLayout from './MainLayout'
+import { SlideEditor } from './SlideEditor';
+import MainLayout from './MainLayout';
 import { NavBar } from './NavBar';
 
 export const EditPresentation = () => {

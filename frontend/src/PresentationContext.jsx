@@ -64,7 +64,7 @@ export const PresentationProvider = ({ children }) => {
         // Initialize slides as an empty array if it doesn't exist
         const existingSlides = Array.isArray(presentation.slides) ? presentation.slides : [];
         // Create a new slide object. Customize as needed.
-        const newSlide = { id: uuidv4(), content: [] };
+        const newSlide = { id: uuidv4(), content: [], backgroundColor: '#ffffff'};
         return { ...presentation, slides: [...existingSlides, newSlide] };
       }
       return presentation;

@@ -7,14 +7,15 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
-import CodeBlock from './codeBlock';
-import MainLayout from './MainLayout'
+import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent } from './ContentRenderers';
+import BackgroundPicker from './BackgroundPicker'; // Adjust path as needed
+// import PreviewPresentation from './PreviewPresentation'; // Adjust the path as necessary
 
 
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
 const deckHeight = 700; // Assuming fixed height for now
 
-const SlideEditor = ({ presentationId }) => {
+export const SlideEditor = ({ presentationId }) => {
   // console.log("render SlideEditor")
   const {
     presentations,
@@ -25,7 +26,7 @@ const SlideEditor = ({ presentationId }) => {
     deleteContentFromSlide,
     updateContentStateOnSlide,
     updateStore,
-    setPresentations,
+    updatePresentationSlides,
   } = usePresentations();
   
   const presentation = presentations.find(p => p.id === presentationId);
@@ -65,58 +66,8 @@ const SlideEditor = ({ presentationId }) => {
     }
   };
 
-  // =================================
-  // Helper function to render image content
-  const renderImageContent = (contentItem, handleImageLoad, contentStyles) => (
-    <img
-      src={contentItem.properties.isBase64 ? `data:image/jpeg;base64,${contentItem.properties.imageUrl}` : contentItem.properties.imageUrl}
-      alt={contentItem.properties.imageAlt}
-      onLoad={handleImageLoad}
-      style={contentStyles}
-      draggable="false"
-    />
-  );
-  
-  // Helper function to render video content
-  const renderVideoContent = (contentItem, handleVideoLoad, contentStyles) => (
-    <iframe
-      src={constructVideoSrc(contentItem.properties.videoUrl, contentItem.properties.autoPlay)}
-      onLoad={handleVideoLoad}
-      style={contentStyles}
-      frameBorder="0"
-      allow="autoplay; encrypted-media"
-      allowFullScreen
-    ></iframe>
-  );
-  
-  const renderCodeContent = (contentItem, contentStyles) => {
-    // Assuming contentStyles might contain any additional styling you want for the code block
-    return (
-      <CodeBlock 
-        code={contentItem.properties.code} 
-        // language={contentItem.properties.language} // Optional: if you have language info
-        style={contentStyles} // You can pass style directly to CodeBlock if it's modified to accept it
-      />
-    );
-  };
-  
 
-  // Function to construct the video source URL, including autoplay parameters if necessary
-  const constructVideoSrc = (videoUrl, autoplay) => {
-    const videoId = extractYouTubeVideoID(videoUrl);
-    const baseUrl = `https://www.youtube.com/embed/${videoId}`;
-    const autoplayParam = autoplay ? "?autoplay=1&mute=1" : "";
-    return `${baseUrl}${autoplayParam}`;
-  };
-
-  // Extracts the YouTube video ID from a given URL
-  const extractYouTubeVideoID = (videoUrl) => {
-    const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const matches = videoUrl.match(regex);
-    return matches ? matches[1] : null;
-  };
-
-  const renderSlideContent = () => {
+  const renderSlideContent = (slides, currentSlideIndex) => {
     // Sort content by the 'layer' property for correct z-index handling
     const sortedContent = (slides[currentSlideIndex]?.content || []).sort((a, b) => a.layer - b.layer);
 
@@ -222,21 +173,11 @@ const SlideEditor = ({ presentationId }) => {
             ...boxStyles,
             ...(isSelected && { boxShadow: "0 0 0 2px blue" }), // Optional: Highlight the selected box
           }}
-          onMouseDown={(e) => handleMouseDown(e, contentItem.id)}
+          onMouseDown={(e) => handleDragMouseDown(e, contentItem.id)}
           onDoubleClick={() => handleDoubleClickOnContent(contentItem.id)}
           onContextMenu={(e) => handleContextMenu(e, contentItem.id)}
         >
-          {contentItem.type === 'TEXT' && (
-            <Typography
-              sx={{
-                fontSize: `${contentItem.properties.fontSize}em`,
-                color: contentItem.properties.color,
-                fontFamily: contentItem.properties.fontFamily, // Apply the selected font family
-              }}
-            >
-              {contentItem.properties.text}
-            </Typography>
-          )}
+          {contentItem.type === 'TEXT' && renderTextContent(contentItem)}
           {contentItem.type === 'IMAGE' && renderImageContent(contentItem, handleImageLoad, contentStyles)}
           {contentItem.type === 'VIDEO' && renderVideoContent(contentItem, handleVideoLoad, contentStyles)}
           {contentItem.type === 'CODE' && renderCodeContent(contentItem, contentStyles)}
@@ -259,7 +200,7 @@ const SlideEditor = ({ presentationId }) => {
   const dragStartRef = useRef({x: 0, y: 0});
   const selectedContentRef = useRef(null);
 
-  const handleMouseDown = (e, contentId) => {
+  const handleDragMouseDown = (e, contentId) => {
     // Prevent default action and event bubbling
     e.preventDefault();
     e.stopPropagation();
@@ -472,14 +413,72 @@ const SlideEditor = ({ presentationId }) => {
     setEditingContent(contentToEdit);
   };
 
+
+  const [isBackgroundPickerOpen, setBackgroundPickerOpen] = useState(false);
+
+  const handleOpenBackgroundPicker = () => {
+    setBackgroundPickerOpen(true);
+  };
+
+  const handleCloseBackgroundPicker = () => {
+    setBackgroundPickerOpen(false);
+  };
+
+  const handleApplyBackground = async ({ backgroundType, color1, color2, gradientDirection, applyTo }) => {
+    let backgroundStyle;
+    if (backgroundType === 'solid') {
+      backgroundStyle = color1; // Solid color
+    } else {
+      // Gradient
+      backgroundStyle = `linear-gradient(${gradientDirection}, ${color1}, ${color2})`;
+    }
+  
+    // Clone the slides array to avoid direct mutation
+    let updatedSlides = [...slides];
+  
+    if (applyTo === 'currentSlide') {
+      // Option 1: Apply background to the current slide only
+      updatedSlides[currentSlideIndex] = {
+        ...updatedSlides[currentSlideIndex],
+        backgroundColor: backgroundStyle
+      };
+    } else if (applyTo === 'allSlides') {
+      // Option 2: Apply as default background color for all slides
+      updatedSlides = updatedSlides.map(slide => ({ ...slide, backgroundColor: backgroundStyle }));
+    }
+  
+    // Update presentations with the new slides array
+    await updatePresentationSlides(presentationId, updatedSlides);
+  
+    // Assuming updatePresentationSlides updates your state, the component should re-render with the new backgrounds
+  };
+
+  const renderSlideBackground = () => {
+    const currentSlide = slides[currentSlideIndex];
+    if (!currentSlide) return {};
+  
+    const backgroundColor = currentSlide.backgroundColor;
+  
+    // Check if backgroundColor contains gradient information
+    if (backgroundColor.startsWith('linear-gradient')) {
+      return { background: backgroundColor };
+    }
+  
+    // Solid color or default white background
+    return { backgroundColor: backgroundColor || '#ffffff' };
+  };
+  
+  // const [slides, setSlides] = useState([...]); // Your slides state
+  const [previewMode, setPreviewMode] = useState(false);
+
   return (
-    <Box sx={{ display: 'flex'}}>
+    <Box sx={{ display: 'flex', overflow: 'hidden', alignItems: 'stretch'}}>
       <SlideSidebar
         editingContent={editingContent}
         setEditingContent={setEditingContent}
         currentSlideIndex={currentSlideIndex}
         presentation={presentation}
-        sx={{ width: '180px', flexShrink: 0 }} // Add this line to set the width
+        sx={{ width: '220px', flexShrink: 0 }} // Add this line to set the width
       />
       <Box sx={{ 
         flex: 1, 
@@ -492,6 +491,7 @@ const SlideEditor = ({ presentationId }) => {
         <Box
           ref={deckRef}
           sx={{
+            ...renderSlideBackground(), // Apply background style
             minHeight: `${deckHeight}px`, // Ensure the minimum height is respected
             minWidth: `${deckWidth}px`, // Ensure the minimum width is respected
             maxHeight: `${deckHeight}px`, // Prevent growing beyond this height
@@ -502,7 +502,7 @@ const SlideEditor = ({ presentationId }) => {
           }}
           onClick={handleDeckClick}
         >
-          {renderSlideContent()}
+          {renderSlideContent(slides, currentSlideIndex)}
         </Box>
 
         <Box sx={{ p: 0, display: 'flex', justifyContent: 'normal', alignItems: 'center'}}>
@@ -532,6 +532,15 @@ const SlideEditor = ({ presentationId }) => {
           <Typography variant="body1" sx={{ marginX: 2 }}>
             {currentSlideIndex + 1} / {slides.length}
           </Typography>
+
+          <Button onClick={handleOpenBackgroundPicker}>Set Background</Button>
+          <BackgroundPicker
+            isOpen={isBackgroundPickerOpen}
+            onClose={handleCloseBackgroundPicker}
+            onApplyBackground={handleApplyBackground}
+          />
+          <Button onClick={() => setPreviewMode(true)}>Preview</Button>
+          {previewMode && <PreviewComponent slides={slides} />}
         </Box>
         
       </Box>
@@ -539,4 +548,4 @@ const SlideEditor = ({ presentationId }) => {
   );
 };
 
-export default SlideEditor;
+// export default SlideEditor;

@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 
 const MainLayout = ({ children, NavBarComponent, navBarProps }) => {
   return (
-    <Box sx={{ display: 'flex' }} component="main">
+    <Box sx={{ display: 'flex', alignItems: 'stretch'}} component="main">
       {NavBarComponent && <NavBarComponent {...navBarProps} />} {/* Conditionally render the NavBar if provided */}
       <Box
         component="main"

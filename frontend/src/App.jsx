@@ -11,7 +11,7 @@ import ProtectedRoute from './ProtectedRoute'; // Import ProtectedRoute
 import { PresentationProvider } from './PresentationContext'; // Adjust the path as necessary
 import MainLayout from './MainLayout'
 import { NavBar } from './NavBar';
-import ExampleComponent from './test';
+import PreviewPresentation from './PreviewPresentation'; // Adjust the path as necessary
 
 function App() {
   return (
@@ -47,6 +47,11 @@ function App() {
             <Route path="/presentation/:presentationId" element={
               <ProtectedRoute>
                 <EditPresentation />
+              </ProtectedRoute>
+            } />
+            <Route path="/presentation/:presentationId/preview" element={
+              <ProtectedRoute>
+                <PreviewPresentation />
               </ProtectedRoute>
             } />
           </Routes>
