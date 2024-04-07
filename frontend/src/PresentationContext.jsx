@@ -12,6 +12,20 @@ const backendURL = `http://localhost:${config.BACKEND_PORT}/store`; // Use the p
 
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
+  // New states for tracking current presentation and slide IDs
+  const [currentPresentationId, setCurrentPresentationId] = useState(null);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(null);
+
+  // Method to update the current presentation ID
+  const updateCurrentPresentationId = (presentationId) => {
+      setCurrentPresentationId(presentationId);
+  };
+
+  // Method to update the current slide ID
+  const updateCurrentSlideIndex = (slideId) => {
+      setCurrentSlideIndex(slideId);
+  };
+
   const { isAuthenticated } = useAuth(); // Destructure to get login function from the context
 
   useEffect(() => {
@@ -230,6 +244,7 @@ export const PresentationProvider = ({ children }) => {
   return (
     <PresentationContext.Provider value={{
       presentations,
+      setPresentations,
       addPresentation,
       deletePresentation,
       updatePresentationTitle,
@@ -241,7 +256,10 @@ export const PresentationProvider = ({ children }) => {
       deleteContentFromSlide,
       updateContentStateOnSlide,
       updateStore,
-      setPresentations,
+      currentPresentationId,
+      updateCurrentPresentationId,
+      currentSlideIndex,
+      updateCurrentSlideIndex,
     }}>
       {children}
     </PresentationContext.Provider>

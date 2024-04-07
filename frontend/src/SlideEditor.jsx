@@ -11,7 +11,6 @@ import { renderTextContent, renderImageContent, renderVideoContent, renderCodeCo
 import BackgroundPicker from './BackgroundPicker'; // Adjust path as needed
 // import PreviewPresentation from './PreviewPresentation'; // Adjust the path as necessary
 
-
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
 const deckHeight = 700; // Assuming fixed height for now
 
@@ -27,6 +26,8 @@ export const SlideEditor = ({ presentationId }) => {
     updateContentStateOnSlide,
     updateStore,
     updatePresentationSlides,
+    updateCurrentPresentationId,
+    updateCurrentSlideIndex,
   } = usePresentations();
   
   const presentation = presentations.find(p => p.id === presentationId);
@@ -39,8 +40,10 @@ export const SlideEditor = ({ presentationId }) => {
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
     presentationsRef.current = presentations;
+    updateCurrentPresentationId(presentation.id);
+    updateCurrentSlideIndex(currentSlideIndex);
     // {presentations && console.log("presentations changed", presentations[0].slides[0].content[0].properties.position)}
-  }, [presentations]);
+  }, [presentations, presentation.id, currentSlideIndex]);
 
 
   const handleAddSlide = async () => {
@@ -67,7 +70,7 @@ export const SlideEditor = ({ presentationId }) => {
   };
 
 
-  const renderSlideContent = (slides, currentSlideIndex) => {
+  const renderSlideContent = () => {
     // Sort content by the 'layer' property for correct z-index handling
     const sortedContent = (slides[currentSlideIndex]?.content || []).sort((a, b) => a.layer - b.layer);
 
@@ -502,7 +505,7 @@ export const SlideEditor = ({ presentationId }) => {
           }}
           onClick={handleDeckClick}
         >
-          {renderSlideContent(slides, currentSlideIndex)}
+          {renderSlideContent()}
         </Box>
 
         <Box sx={{ p: 0, display: 'flex', justifyContent: 'normal', alignItems: 'center'}}>
