@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 import CodeBlock from './codeBlock';
-import { Rnd } from 'react-rnd';
+import MainLayout from './MainLayout'
 
 
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
@@ -49,6 +49,12 @@ const SlideEditor = ({ presentationId }) => {
   const handleDeleteSlide = async () => {
     if (slides.length > 0) {
       await deleteSlide(presentationId, slides[currentSlideIndex].id);
+      // Check if the deleted slide was the last in the list
+      if (currentSlideIndex === slides.length - 1) {
+        // Move to the previous slide if the last one was deleted,
+        // which means reducing the index by 1
+        setCurrentSlideIndex(currentSlideIndex - 1);
+      }
     }
   };
 
@@ -56,13 +62,6 @@ const SlideEditor = ({ presentationId }) => {
     const newIndex = currentSlideIndex + direction;
     if (newIndex >= 0 && newIndex < slides.length) {
       setCurrentSlideIndex(newIndex);
-    }
-  };
-
-  const handleAddContent = async (type, properties) => {
-    if (slides.length > 0) {
-      const slideId = slides[currentSlideIndex].id;
-      await addContentToSlide(presentationId, slideId, { type, properties });
     }
   };
 
@@ -204,7 +203,7 @@ const SlideEditor = ({ presentationId }) => {
         width: '5px',
         height: '5px',
         backgroundColor: 'blue',
-        zIndex: 1000,
+        // zIndex: 1000,
       };
     
       const resizeHandles = isSelected ? [
@@ -228,7 +227,13 @@ const SlideEditor = ({ presentationId }) => {
           onContextMenu={(e) => handleContextMenu(e, contentItem.id)}
         >
           {contentItem.type === 'TEXT' && (
-            <Typography sx={{ fontSize: `${contentItem.properties.fontSize}em`, color: contentItem.properties.color }}>
+            <Typography
+              sx={{
+                fontSize: `${contentItem.properties.fontSize}em`,
+                color: contentItem.properties.color,
+                fontFamily: contentItem.properties.fontFamily, // Apply the selected font family
+              }}
+            >
               {contentItem.properties.text}
             </Typography>
           )}
@@ -468,31 +473,39 @@ const SlideEditor = ({ presentationId }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex'}}>
       <SlideSidebar
         editingContent={editingContent}
         setEditingContent={setEditingContent}
         currentSlideIndex={currentSlideIndex}
         presentation={presentation}
+        sx={{ width: '180px', flexShrink: 0 }} // Add this line to set the width
       />
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center', // Center children horizontally in the column direction
+        justifyContent: 'center', // Center children vertically
+      }}>
 
-      <Box
-        ref={deckRef}
-        sx={{
-          flex: 1,
-          border: '2px dashed #ccc',
-          position: 'relative',
-          overflow: 'hidden',
-          height: {deckHeight}, // Set the desired height
-          width: {deckWidth}, // Set the desired width
-        }}
-        onClick={handleDeckClick} // Add this handler
-      >
-        {renderSlideContent()}
-      </Box>
+        <Box
+          ref={deckRef}
+          sx={{
+            minHeight: `${deckHeight}px`, // Ensure the minimum height is respected
+            minWidth: `${deckWidth}px`, // Ensure the minimum width is respected
+            maxHeight: `${deckHeight}px`, // Prevent growing beyond this height
+            maxWidth: `${deckWidth}px`, // Prevent growing beyond this width
+            border: '2px dashed #ccc',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+          onClick={handleDeckClick}
+        >
+          {renderSlideContent()}
+        </Box>
 
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'normal'}}>
+        <Box sx={{ p: 0, display: 'flex', justifyContent: 'normal', alignItems: 'center'}}>
           <IconButton onClick={() => handleMoveSlide(-1)} disabled={currentSlideIndex === 0}>
             <ArrowBackIosNewIcon />
           </IconButton>
@@ -520,7 +533,7 @@ const SlideEditor = ({ presentationId }) => {
             {currentSlideIndex + 1} / {slides.length}
           </Typography>
         </Box>
-
+        
       </Box>
     </Box>
   );

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Drawer, List, ListItem, ListItemText, Box, Divider, Typography, Button } from '@mui/material';
+import { Drawer, List, ListItem, ListItemText, Box, Divider, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 
 // Styled Link for better appearance
@@ -22,7 +22,7 @@ export const NavBar = ({ presentationControls }) => {
   };
 
   // Drawer width
-  const drawerWidth = 240;
+  const drawerWidth = 180;
 
   return (
     <Drawer

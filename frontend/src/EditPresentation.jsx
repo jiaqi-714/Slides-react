@@ -60,8 +60,8 @@ export const EditPresentation = () => {
 
   return (
     <MainLayout NavBarComponent={NavBar} navBarProps={{ presentationControls }}>
-      <Box sx={{ margin: 1 }}>
-        {/* // Inside the EditPresentation component, replace the slide presentation and navigation JSX with: */}
+      <Box sx={{ margin: 0}}>
+
         <SlideEditor presentationId={presentationId} />
 
         {/* Modal for title editing */}

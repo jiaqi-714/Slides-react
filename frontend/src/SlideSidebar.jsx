@@ -1,32 +1,43 @@
 // SlideSidebar.jsx
 import React, { useState, useContext, useEffect} from 'react';
-import { Box, Button, Typography, TextField, Slider, FormControlLabel, Switch, Grid } from '@mui/material';
+import { Box, Button, Typography, TextField, Slider, MenuItem, Drawer} from '@mui/material';
 // Import your context if using context for state management
 import { usePresentations } from './PresentationContext';
 
-const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, presentation}) => {
+// Drawer width
+const drawerWidth = 180;
+
+const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, presentation, sx }) => {
   const { presentations, addContentToSlide, updateContentOnSlide } = usePresentations();
   const [elementType, setElementType] = useState('');
   const [showPropertiesInput, setShowPropertiesInput] = useState(false);
-  const [contentProperties, setContentProperties] = useState({
+  const defaultContentProperties = {
     position: { x: 0, y: 0 },
-    size: 50, // Unified size property as a percentage for all element types
+    size: 50,
     width: 50, // Width as a percentage of the deck's width
-    height: 30, // Height as a percentage (optional, if you need it)
-    // Text properties
+    height: 50, // Height as a percentage of the deck
     text: '',
     fontSize: 1,
     color: '#000000',
-    // Image & Video properties
     imageUrl: '',
     imageAlt: '',
     isBase64: false,
     videoUrl: '',
     autoPlay: false,
-    // Code properties
     code: '',
-  });
+    fontFamily: "Arial, sans-serif", // Assuming you're including the font family adjustment feature
+  };
+  const [contentProperties, setContentProperties] = useState(defaultContentProperties);
   
+  const availableFonts = [
+    { label: "Arial", value: "Arial, sans-serif" },
+    { label: "Verdana", value: "Verdana, sans-serif" },
+    { label: "Helvetica", value: "Helvetica, sans-serif" },
+    { label: "Times New Roman", value: "'Times New Roman', serif" },
+    { label: "Courier New", value: "'Courier New', monospace" },
+    // Add more fonts as needed
+  ];
+
   useEffect(() => {
     if (editingContent) {
       setElementType(editingContent.type);
@@ -61,22 +72,8 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
   };
 
   const resetForm = () => {
-    setElementType('');
-    setContentProperties({
-      position: { x: 0, y: 0 },
-      size: 50,
-      width: 50, // Width as a percentage of the deck's width
-      height: 30, // Height as a percentage (optional, if you need it)
-      text: '',
-      fontSize: 1,
-      color: '#000000',
-      imageUrl: '',
-      imageAlt: '',
-      isBase64: false,
-      videoUrl: '',
-      autoPlay: false,
-      code: '',
-    });
+    // setElementType('');
+    setContentProperties(defaultContentProperties);
   };
 
   const renderPropertiesInput = () => {
@@ -91,8 +88,43 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           value={contentProperties.text}
           onChange={(e) => handleChange('text', e.target.value)}
         />
+        <Typography gutterBottom>Font Size (em)</Typography>
+        <Slider
+          value={contentProperties.fontSize}
+          step={0.1}
+          min={0.5}
+          max={5}
+          marks
+          valueLabelDisplay="auto"
+          onChange={(e, newValue) => handleChange('fontSize', newValue)}
+        />
+        <TextField
+          label="Color"
+          type="color"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={contentProperties.color}
+          onChange={(e) => handleChange('color', e.target.value)}
+          inputProps={{ maxLength: 7 }} // HEX color code has max length of 7 including '#'
+        />
+        <TextField
+          select
+          label="Font Family"
+          value={contentProperties.fontFamily}
+          onChange={(e) => handleChange('fontFamily', e.target.value)}
+          variant="outlined"
+          fullWidth
+          margin="normal"
+        >
+          {availableFonts.map((font) => (
+            <MenuItem key={font.value} value={font.value}>
+              {font.label}
+            </MenuItem>
+          ))}
+        </TextField>
       </>
-    );
+    );    
   
     const imageFields = (
       <>
@@ -139,6 +171,16 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           margin="normal"
           value={contentProperties.code}
           onChange={(e) => handleChange('code', e.target.value)}
+        />
+        <Typography gutterBottom>Font Size (em)</Typography>
+        <Slider
+          value={contentProperties.fontSize}
+          step={0.1}
+          min={0.5}
+          max={5}
+          marks
+          valueLabelDisplay="auto"
+          onChange={(e, newValue) => handleChange('fontSize', newValue)}
         />
       </>
     );
@@ -199,7 +241,6 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
   // Modified handleSetElementType function to also show properties input
   const handleSetElementType = (type) => {
     setEditingContent(null);
-    console.log(type)
     setElementType(type);
     setShowPropertiesInput(true);
   };
@@ -216,7 +257,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
   };
 
   return (
-    <Box sx={{ p: 2, width: 250, borderRight: '1px solid #ccc', height: '100vh' }}>
+    <Box sx={{ ...sx, p: 2, borderRight: '1px solid #ccc'}}>
       <Button onClick={() => handleSetElementType('TEXT')}>Text</Button>
       <Button onClick={() => handleSetElementType('IMAGE')}>Image</Button>
       <Button onClick={() => handleSetElementType('VIDEO')}>Video</Button>
