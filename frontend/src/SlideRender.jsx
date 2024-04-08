@@ -6,6 +6,7 @@ import { renderTextContent, renderImageContent, renderVideoContent, renderCodeCo
 import config from './config.json';
 
 const deckWidth = config.deckWidth
+const deckHeight = config.deckHeight
 
 export const renderSlideContentPreview = (slides, currentSlideIndex) => {
   // console.log("re renderSlideContentNew!")
@@ -17,12 +18,9 @@ export const renderSlideContentPreview = (slides, currentSlideIndex) => {
   return sortedContent.map((contentItem, index) => {
     // Function to dynamically adjust the image size upon loading
     const handleImageLoad = (event) => {
-      const imageSizeRatio = contentItem.properties.size / 100; // Convert percentage to a ratio
-      const naturalWidth = event.target.naturalWidth;
-      const naturalHeight = event.target.naturalHeight;
-      const deckRatio = deckWidth / naturalWidth;
-      const displayedWidth = naturalWidth * imageSizeRatio * deckRatio;
-      const displayedHeight = naturalHeight * imageSizeRatio * deckRatio;
+      const imageSizeRatio = contentItem.properties.size / 100;
+      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio; // Adjust calculation as needed
+      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio; // Adjust calculation as needed
       event.target.style.width = `${displayedWidth}px`;
       event.target.style.height = `${displayedHeight}px`;
     };
@@ -74,8 +72,13 @@ export const renderSlideContentPreview = (slides, currentSlideIndex) => {
     };
 
     if (contentItem.type === 'IMAGE') {
+      const imageSizeRatio = contentItem.properties.size / 100;
+      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio; // Adjust calculation as needed
+      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio; // Adjust calculation as needed
       contentStyles = {
         display: 'block',
+        width: `${displayedWidth}px` || 'auto',
+        height: `${displayedHeight}px` || 'auto'
       };
     } else if (contentItem.type === 'VIDEO') {
       contentStyles = {
