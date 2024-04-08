@@ -10,7 +10,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
   const [showPropertiesInput, setShowPropertiesInput] = useState(false);
   const defaultContentProperties = {
     position: { x: 0, y: 0 },
-    size: 50,
+    size: 100, // for image size
     width: 50, // Width as a percentage of the deck's width
     height: 50, // Height as a percentage of the deck
     text: '',

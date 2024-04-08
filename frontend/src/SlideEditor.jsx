@@ -96,12 +96,9 @@ export const SlideEditor = ({ presentationId }) => {
     return sortedContent.map((contentItem, index) => {
       // Function to dynamically adjust the image size upon loading
       const handleImageLoad = (event) => {
-        const imageSizeRatio = contentItem.properties.size / 100; // Convert percentage to a ratio
-        const naturalWidth = event.target.naturalWidth;
-        const naturalHeight = event.target.naturalHeight;
-        const deckRatio = deckWidth / naturalWidth;
-        const displayedWidth = naturalWidth * imageSizeRatio * deckRatio;
-        const displayedHeight = naturalHeight * imageSizeRatio * deckRatio;
+        const imageSizeRatio = contentItem.properties.size / 100;
+        const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio; // Adjust calculation as needed
+        const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio; // Adjust calculation as needed
         event.target.style.width = `${displayedWidth}px`;
         event.target.style.height = `${displayedHeight}px`;
       };
@@ -153,8 +150,13 @@ export const SlideEditor = ({ presentationId }) => {
       };
 
       if (contentItem.type === 'IMAGE') {
+        const imageSizeRatio = contentItem.properties.size / 100;
+        const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio; // Adjust calculation as needed
+        const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio; // Adjust calculation as needed
         contentStyles = {
           display: 'block',
+          width: `${displayedWidth}px` || 'auto',
+          height: `${displayedHeight}px` || 'auto'
         };
       } else if (contentItem.type === 'VIDEO') {
         contentStyles = {
@@ -188,8 +190,6 @@ export const SlideEditor = ({ presentationId }) => {
             { id: 'bottom-right', style: { ...resizeHandleStyles, right: '-2.5px', bottom: '-2.5px', cursor: 'nwse-resize' } },
           ]
         : [];
-
-      // console.log("re render")
 
       return (
         <Box
@@ -382,7 +382,6 @@ export const SlideEditor = ({ presentationId }) => {
       newX = Math.max(Math.min(newX, 100 - newWidth), 0);
       newY = Math.max(Math.min(newY, 100 - newHeight), 0);
 
-      // Update the size and position
       updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContentRef.current.id, {
         properties: {
           width: newWidth,
