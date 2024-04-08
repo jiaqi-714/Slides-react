@@ -12,11 +12,13 @@ export const EditPresentation = () => {
   const navigate = useNavigate();
   const [editTitleOpen, setEditTitleOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newThumbnail, setNewThumbnail] = useState('');
 
   // console.log("render EditPresentation")
 
   // Use the PresentationContext
-  const { presentations, deletePresentation, updatePresentationTitle } = usePresentations();
+  const { presentations, deletePresentation, updatePresentationDetails } = usePresentations();
 
   const presentation = presentations.find(p => p.id === presentationId);
 
@@ -36,9 +38,13 @@ export const EditPresentation = () => {
     setEditTitleOpen(true);
   };
 
-  const handleUpdateTitle = async () => {
-    await updatePresentationTitle(presentationId, newTitle);
-    setEditTitleOpen(false);
+  const handleUpdateDetails = async () => {
+    await updatePresentationDetails(presentationId, {
+      name: newTitle,
+      description: newDescription,
+      thumbnail: newThumbnail
+    });
+    setEditTitleOpen(false); // Assuming this is the state controlling the modal visibility
   };
 
   const handleBack = () => {
@@ -88,24 +94,32 @@ export const EditPresentation = () => {
             gap: 2,
             minWidth: 300,
           }}>
-            <Typography id="edit-title-modal" variant="h6" component="h2">
-              Edit Title
-            </Typography>
             <TextField
               fullWidth
-              id="edit-title-modal-description"
-              label="New Title"
+              label="Presentation Name"
               variant="outlined"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              sx={{
-                '.MuiInputBase-root': {
-                  borderRadius: '4px',
-                }
-              }}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              variant="outlined"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Thumbnail URL"
+              variant="outlined"
+              value={newThumbnail}
+              onChange={(e) => setNewThumbnail(e.target.value)}
+              margin="normal"
             />
             <Button
-              onClick={handleUpdateTitle}
+              onClick={handleUpdateDetails}
               variant="contained"
               color="primary"
               sx={{

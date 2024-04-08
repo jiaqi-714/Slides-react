@@ -61,9 +61,9 @@ export const PresentationProvider = ({ children }) => {
     await updateStore(updatedPresentations);
   };
 
-  const updatePresentationTitle = async (presentationId, newTitle) => {
+  const updatePresentationDetails = async (presentationId, newDetails) => {
     const updatedPresentations = presentations.map(presentation =>
-      presentation.id === presentationId ? { ...presentation, name: newTitle } : presentation
+      presentation.id === presentationId ? { ...presentation, ...newDetails } : presentation
     );
     await updateStore(updatedPresentations);
   };
@@ -273,7 +273,7 @@ export const PresentationProvider = ({ children }) => {
       setPresentations,
       addPresentation,
       deletePresentation,
-      updatePresentationTitle,
+      updatePresentationDetails,
       addSlideToPresentation,
       updatePresentationSlides,
       deleteSlide,

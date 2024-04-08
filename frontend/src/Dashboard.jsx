@@ -9,6 +9,8 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [newPresentationName, setNewPresentationName] = useState('');
+  const [newPresentationDescription, setNewPresentationDescription] = useState('');
+  const [newPresentationThumbnailUrl, setNewPresentationThumbnailUrl] = useState('');
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -20,7 +22,8 @@ export const Dashboard = () => {
     // Adapt this logic to match your context's method signature
     await addPresentation({
       name: newPresentationName,
-      description: 'wait for input...'
+      description: newPresentationDescription,
+      thumbnail: newPresentationThumbnailUrl,
       // Include other necessary presentation details
     });
     setNewPresentationName('');
@@ -54,26 +57,26 @@ export const Dashboard = () => {
                     component="img"
                     image={presentation.thumbnail}
                     alt="presentation thumbnail"
-                    sx={{ height: 140, backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing
+                    sx={{ height: '50%', backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing
                   />
                   )
                 : (
-                  <Box sx={{ height: 140, bgcolor: 'grey' }} /> // Grey square if empty
+                  <Box sx={{ flex: '1 0 50%', bgcolor: 'grey' }} /> // Grey square if empty
                   )
               }
-              <CardContent>
+              <CardContent sx={{ p: 1 }}>
                 <Typography gutterBottom variant="h5" component="div">
                   {presentation.name}
                 </Typography>
-                {/* Conditional rendering for the description */}
-                {presentation.description && (
-                  <Typography variant="body2" color="text.secondary">
-                    {presentation.description}
+                {/* Use Box as a flex container for description and slide count */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                    {presentation.description || 'No description'} {/* Provide a fallback if no description */}
                   </Typography>
-                )}
-                <Typography variant="body2" color="text.secondary">
-                  Slides: {presentation.slides ? presentation.slides.length : 0}
-                </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
+                    Slides: {presentation.slides ? presentation.slides.length : 0}
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
@@ -109,24 +112,36 @@ export const Dashboard = () => {
           </Typography>
           <TextField
             fullWidth
-            id="create-presentation-modal-description"
             label="Presentation Name"
             variant="outlined"
             value={newPresentationName}
             onChange={(e) => setNewPresentationName(e.target.value)}
             margin="normal"
-            sx={{
-              '.MuiInputBase-root': { // Targets the input field for styling
-                borderRadius: '4px', // Rounded corners for the input field
-              }
-            }}
+          />
+          {/* Description input */}
+          <TextField
+            fullWidth
+            label="Description"
+            variant="outlined"
+            value={newPresentationDescription} // Add corresponding state variable for description
+            onChange={(e) => setNewPresentationDescription(e.target.value)} // Update accordingly
+            margin="normal"
+          />
+          {/* Thumbnail URL input */}
+          <TextField
+            fullWidth
+            label="Thumbnail URL"
+            variant="outlined"
+            value={newPresentationThumbnailUrl} // Add corresponding state variable for thumbnail URL
+            onChange={(e) => setNewPresentationThumbnailUrl(e.target.value)} // Update accordingly
+            margin="normal"
           />
           <Button
             onClick={handleCreatePresentation}
             variant="contained"
             color="primary"
             sx={{
-              ':hover': { // Enhanced button hover effect
+              ':hover': {
                 backgroundColor: 'primary.dark',
               }
             }}>
