@@ -9,11 +9,11 @@ import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent, renderSlideBackground } from './ContentRenderers';
 import BackgroundPicker from './BackgroundPicker'; // Adjust path as needed
-import { useNavigate } from 'react-router-dom';
-import { renderSlideContentPreview } from './SlideRender';
+import { useParams, useNavigate } from 'react-router-dom';
+import config from './config.json';
 
-const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
-const deckHeight = 700; // Assuming fixed height for now
+const deckWidth = config.deckWidth; // Assuming fixed width for now, but you can dynamically determine this
+const deckHeight = config.deckHeight; // Assuming fixed height for now
 
 export const SlideEditor = ({ presentationId }) => {
   // console.log("render SlideEditor")
@@ -25,8 +25,6 @@ export const SlideEditor = ({ presentationId }) => {
     updateContentStateOnSlide,
     updateStore,
     updatePresentationSlides,
-    updateCurrentPresentationId,
-    updateCurrentSlideIndex,
   } = usePresentations();
   
   const presentation = presentations.find(p => p.id === presentationId);
@@ -36,15 +34,37 @@ export const SlideEditor = ({ presentationId }) => {
   const [editingContent, setEditingContent] = useState(null); // State to track editing content
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const navigate = useNavigate();
+  const { slideNumber } = useParams(); // Assuming your route is defined with :slideNumber
+  const [isInternalNavigation, setIsInternalNavigation] = useState(false);
+
+  useEffect(() => {
+    if (slideNumber) {
+      const slideIndexFromUrl = parseInt(slideNumber, 10) - 1;
+
+      if (slideIndexFromUrl !== currentSlideIndex) {
+        if (slideIndexFromUrl >= 0 && slideIndexFromUrl < slides.length) {
+          setCurrentSlideIndex(slideIndexFromUrl);
+        } else {
+          navigate(`/presentation/${presentationId}/edit/1`, { replace: true });
+        }
+        // This change was initiated by a URL update, reset the flag
+        setIsInternalNavigation(false);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideNumber, presentationId]);
+  
+  useEffect(() => {
+    // Only navigate if the change was triggered internally and the currentSlideIndex is different from URL
+    if (isInternalNavigation && parseInt(slideNumber, 10) !== currentSlideIndex + 1) {
+      navigate(`/presentation/${presentationId}/edit/${currentSlideIndex + 1}`, { replace: true });
+    }
+  }, [currentSlideIndex, isInternalNavigation, navigate, presentationId, slideNumber]);
 
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
     presentationsRef.current = presentations;
-    updateCurrentPresentationId(presentation.id);
-    updateCurrentSlideIndex(currentSlideIndex);
-    // {presentations && console.log("presentations changed", presentations[0].slides[0].content[0].properties.position)}
-  }, [presentations, presentation.id, currentSlideIndex]);
-
+  }, [presentations]);
 
   const handleAddSlide = async () => {
     await addSlideToPresentation(presentationId);
@@ -65,10 +85,10 @@ export const SlideEditor = ({ presentationId }) => {
   const handleMoveSlide = (direction) => {
     const newIndex = currentSlideIndex + direction;
     if (newIndex >= 0 && newIndex < slides.length) {
+      setIsInternalNavigation(true);
       setCurrentSlideIndex(newIndex);
     }
   };
-
 
   const renderSlideContent = () => {
     // Sort content by the 'layer' property for correct z-index handling
@@ -457,7 +477,7 @@ export const SlideEditor = ({ presentationId }) => {
   };
 
   const handlePreview = () => {
-    navigate(`/presentation/${presentationId}/preview`);
+    navigate(`/presentation/${presentationId}/preview/1`);
   };
 
   return (

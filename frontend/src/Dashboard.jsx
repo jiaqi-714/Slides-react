@@ -47,8 +47,8 @@ export const Dashboard = () => {
     }}>
       <Grid container spacing={2}>
         {presentations.map((presentation) => (
-          <Grid item xs={12} sm={8} md={6} lg={4} key={presentation.id} onClick={() => navigate(`/presentation/${presentation.id}`)}>
-            <Card sx={{ 
+        <Grid item xs={12} sm={8} md={6} lg={4} key={presentation.id} onClick={() => navigate(`/presentation/${presentation.id}/edit/1`)}>
+          <Card sx={{ 
               width: 300, // Fixed width
               height: 150, // Height is half of width, maintaining a 2:1 ratio
               display: 'flex', 

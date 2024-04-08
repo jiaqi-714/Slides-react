@@ -44,12 +44,22 @@ function App() {
                 </MainLayout>
               </ProtectedRoute>
             } />
-            <Route path="/presentation/:presentationId" element={
+            <Route path="/presentation/:presentationId/edit/" element={
               <ProtectedRoute>
                 <EditPresentation />
               </ProtectedRoute>
             } />
-            <Route path="/presentation/:presentationId/preview" element={
+            <Route path="/presentation/:presentationId/edit/:slideNumber" element={
+              <ProtectedRoute>
+                <EditPresentation />
+              </ProtectedRoute>
+            } />
+            <Route path="/presentation/:presentationId/preview/" element={
+              <ProtectedRoute>
+                <PreviewPresentation />
+              </ProtectedRoute>
+            } />
+            <Route path="/presentation/:presentationId/preview/:slideNumber" element={
               <ProtectedRoute>
                 <PreviewPresentation />
               </ProtectedRoute>

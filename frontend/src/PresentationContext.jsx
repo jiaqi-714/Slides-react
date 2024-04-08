@@ -13,18 +13,6 @@ const backendURL = `http://localhost:${config.BACKEND_PORT}/store`; // Use the p
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
   // New states for tracking current presentation and slide IDs
-  const [currentPresentationId, setCurrentPresentationId] = useState(null);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(null);
-
-  // Method to update the current presentation ID
-  const updateCurrentPresentationId = (presentationId) => {
-      setCurrentPresentationId(presentationId);
-  };
-
-  // Method to update the current slide ID
-  const updateCurrentSlideIndex = (slideId) => {
-      setCurrentSlideIndex(slideId);
-  };
 
   const { isAuthenticated } = useAuth(); // Destructure to get login function from the context
 
@@ -54,10 +42,12 @@ export const PresentationProvider = ({ children }) => {
     const presentationWithId = {
       ...newPresentation,
       id: uuidv4(), // This assigns a unique UUID
+      slides: [], // Assuming presentations include a slides array
     };
-  
+    
     const updatedPresentations = [...presentations, presentationWithId];
-    await updateStore(updatedPresentations);
+    addSlideToPresentation(presentationWithId.id, updatedPresentations)
+    // await updateStore(updatedPresentations);
   };
   
   const deletePresentation = async (presentationId) => {
@@ -72,13 +62,17 @@ export const PresentationProvider = ({ children }) => {
     await updateStore(updatedPresentations);
   };
 
-  const addSlideToPresentation = async (presentationId) => {
-    let updatedPresentations = presentations.map(presentation => {
+  const addSlideToPresentation = async (presentationId, providedUpdatedPresentations) => {
+    // Use the provided updatedPresentations if it exists, otherwise fall back to the current presentations state
+    let workingPresentations = providedUpdatedPresentations || presentations;
+  
+    let updatedPresentations = workingPresentations.map(presentation => {
       if (presentation.id === presentationId) {
         // Initialize slides as an empty array if it doesn't exist
         const existingSlides = Array.isArray(presentation.slides) ? presentation.slides : [];
         // Create a new slide object. Customize as needed.
         const newSlide = { id: uuidv4(), content: [], backgroundColor: '#ffffff'};
+        console.log("create slide successful")
         return { ...presentation, slides: [...existingSlides, newSlide] };
       }
       return presentation;
@@ -256,10 +250,6 @@ export const PresentationProvider = ({ children }) => {
       deleteContentFromSlide,
       updateContentStateOnSlide,
       updateStore,
-      currentPresentationId,
-      updateCurrentPresentationId,
-      currentSlideIndex,
-      updateCurrentSlideIndex,
     }}>
       {children}
     </PresentationContext.Provider>

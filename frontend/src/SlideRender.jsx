@@ -10,7 +10,7 @@ const deckWidth = config.deckWidth
 export const renderSlideContentPreview = (slides, currentSlideIndex) => {
   // console.log("re renderSlideContentNew!")
 
-  console.log(slides, currentSlideIndex)
+  // console.log(slides, currentSlideIndex)
   // Sort content by the 'layer' property for correct z-index handling
   const sortedContent = (slides[currentSlideIndex]?.content || []).sort((a, b) => a.layer - b.layer);
 
