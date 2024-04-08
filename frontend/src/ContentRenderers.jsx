@@ -59,7 +59,7 @@ const constructVideoSrc = (videoUrl, autoplay) => {
 
 // Extracts the YouTube video ID from a given URL
 const extractYouTubeVideoID = (videoUrl) => {
-  const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const regex = /(?:youtube.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu.be\/)([a-zA-Z0-9_-]{11})/;
   const matches = videoUrl.match(regex);
   return matches ? matches[1] : null;
 };

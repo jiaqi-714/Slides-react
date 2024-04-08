@@ -1,14 +1,11 @@
 // SlideSidebar.jsx
-import React, { useState, useContext, useEffect } from 'react';
-import { Box, Button, Typography, TextField, Slider, MenuItem, Drawer, FormControlLabel, Switch } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, Typography, TextField, Slider, MenuItem, FormControlLabel, Switch } from '@mui/material';
 // Import your context if using context for state management
 import { usePresentations } from './PresentationContext';
 
-// Drawer width
-const drawerWidth = 180;
-
 const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, presentation, sx }) => {
-  const { presentations, addContentToSlide, updateContentOnSlide } = usePresentations();
+  const { addContentToSlide, updateContentOnSlide } = usePresentations();
   const [elementType, setElementType] = useState('');
   const [showPropertiesInput, setShowPropertiesInput] = useState(false);
   const defaultContentProperties = {

@@ -34,21 +34,23 @@ export const NavBar = ({ presentationControls }) => {
       }}
     >
       <Box sx={{ overflow: 'auto' }}>
-        {presentationControls ? (
-          <>
-            <Typography variant="h6" sx={{ p: 2 }}>{presentationControls.title}</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
-              {presentationControls.actions.map((action, index) => (
-                // Wrap Button with ListItem to maintain list item styling
-                <ListItem button key={index} onClick={action.onClick} sx={{ justifyContent: 'flex-start' }}>
-                  <ListItemText primary={action.label} />
-                </ListItem>
-              ))}
+        {presentationControls
+          ? (
+            <>
+              <Typography variant="h6" sx={{ p: 2 }}>{presentationControls.title}</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
+                {presentationControls.actions.map((action, index) => (
+                  // Wrap Button with ListItem to maintain list item styling
+                  <ListItem button key={index} onClick={action.onClick} sx={{ justifyContent: 'flex-start' }}>
+                    <ListItemText primary={action.label} />
+                  </ListItem>
+                ))}
             </Box>
             <Divider />
-          </>
-        ) : (
-          <List>
+            </>
+            )
+          : (
+            <List>
             <ListItem button key="Dashboard">
               <StyledLink to="/dashboard">
                 <ListItemText primary="Dashboard" />
@@ -56,8 +58,8 @@ export const NavBar = ({ presentationControls }) => {
             </ListItem>
             {/* Other navigation items here */}
             <Divider />
-          </List>
-        )}
+            </List>
+            )}
         <List>
           {/* Maintain consistency in list item styling for Logout */}
           <ListItem button key="Logout" onClick={handleLogout}>

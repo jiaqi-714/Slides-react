@@ -56,9 +56,11 @@ export const Dashboard = () => {
                     alt="presentation thumbnail"
                     sx={{ height: 140, backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing
                   />
-                  ) : (
+                  )
+                : (
                   <Box sx={{ height: 140, bgcolor: 'grey' }} /> // Grey square if empty
-              )}
+                  )
+              }
               <CardContent>
                 <Typography gutterBottom variant="h5" component="div">
                   {presentation.name}

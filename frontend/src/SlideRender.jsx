@@ -1,6 +1,6 @@
 
 // SlideRender.jsx
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { Box } from '@mui/material';
 import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent } from './ContentRenderers';
 import config from './config.json';
@@ -60,7 +60,7 @@ export const renderSlideContentPreview = (slides, currentSlideIndex) => {
     }
 
     // Apply border and padding for CODE content
-    if (contentItem.type == 'CODE') {
+    if (contentItem.type === 'CODE') {
       boxStyles = {
         ...boxStyles,
         background: '#f5f5f5',
