@@ -64,3 +64,18 @@ const extractYouTubeVideoID = (videoUrl) => {
   const matches = videoUrl.match(regex);
   return matches ? matches[1] : null;
 };
+
+export const renderSlideBackground = (slides, currentSlideIndex) => {
+  const currentSlide = slides[currentSlideIndex];
+  if (!currentSlide) return {};
+
+  const backgroundColor = currentSlide.backgroundColor;
+
+  // Check if backgroundColor contains gradient information
+  if (backgroundColor.startsWith('linear-gradient')) {
+    return { background: backgroundColor };
+  }
+
+  // Solid color or default white background
+  return { backgroundColor: backgroundColor || '#ffffff' };
+};

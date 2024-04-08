@@ -7,9 +7,10 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
-import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent } from './ContentRenderers';
+import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent, renderSlideBackground } from './ContentRenderers';
 import BackgroundPicker from './BackgroundPicker'; // Adjust path as needed
-// import PreviewPresentation from './PreviewPresentation'; // Adjust the path as necessary
+import { useNavigate } from 'react-router-dom';
+import { renderSlideContentPreview } from './SlideRender';
 
 const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
 const deckHeight = 700; // Assuming fixed height for now
@@ -20,8 +21,6 @@ export const SlideEditor = ({ presentationId }) => {
     presentations,
     addSlideToPresentation,
     deleteSlide,
-    addContentToSlide,
-    updateContentOnSlide,
     deleteContentFromSlide,
     updateContentStateOnSlide,
     updateStore,
@@ -36,6 +35,7 @@ export const SlideEditor = ({ presentationId }) => {
   const deckRef = useRef(null);
   const [editingContent, setEditingContent] = useState(null); // State to track editing content
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const navigate = useNavigate();
 
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
@@ -456,23 +456,9 @@ export const SlideEditor = ({ presentationId }) => {
     // Assuming updatePresentationSlides updates your state, the component should re-render with the new backgrounds
   };
 
-  const renderSlideBackground = () => {
-    const currentSlide = slides[currentSlideIndex];
-    if (!currentSlide) return {};
-  
-    const backgroundColor = currentSlide.backgroundColor;
-  
-    // Check if backgroundColor contains gradient information
-    if (backgroundColor.startsWith('linear-gradient')) {
-      return { background: backgroundColor };
-    }
-  
-    // Solid color or default white background
-    return { backgroundColor: backgroundColor || '#ffffff' };
+  const handlePreview = () => {
+    navigate(`/presentation/${presentationId}/preview`);
   };
-  
-  // const [slides, setSlides] = useState([...]); // Your slides state
-  const [previewMode, setPreviewMode] = useState(false);
 
   return (
     <Box sx={{ display: 'flex', overflow: 'hidden', alignItems: 'stretch'}}>
@@ -494,7 +480,7 @@ export const SlideEditor = ({ presentationId }) => {
         <Box
           ref={deckRef}
           sx={{
-            ...renderSlideBackground(), // Apply background style
+            ...renderSlideBackground(slides, currentSlideIndex), // Apply background style
             minHeight: `${deckHeight}px`, // Ensure the minimum height is respected
             minWidth: `${deckWidth}px`, // Ensure the minimum width is respected
             maxHeight: `${deckHeight}px`, // Prevent growing beyond this height
@@ -542,8 +528,7 @@ export const SlideEditor = ({ presentationId }) => {
             onClose={handleCloseBackgroundPicker}
             onApplyBackground={handleApplyBackground}
           />
-          <Button onClick={() => setPreviewMode(true)}>Preview</Button>
-          {previewMode && <PreviewComponent slides={slides} />}
+          <Button onClick={handlePreview}>Preview</Button>
         </Box>
         
       </Box>

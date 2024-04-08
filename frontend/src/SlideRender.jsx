@@ -1,23 +1,16 @@
 
-//SlideEditor.jsx
+//SlideRender.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { usePresentations } from './PresentationContext';
 import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent } from './ContentRenderers';
+import config from './config.json';
 
-const deckWidth = 960; // Assuming fixed width for now, but you can dynamically determine this
-const deckHeight = 700; // Assuming fixed height for now
+const deckWidth = config.deckWidth
 
-export const renderSlideContentPreview = () => {
+export const renderSlideContentPreview = (slides, currentSlideIndex) => {
   // console.log("re renderSlideContentNew!")
-  const {
-    presentations,
-    currentPresentationId,
-    currentSlideIndex,
-  } = usePresentations();
 
-  const presentation = presentations.find(p => p.id === currentPresentationId);
-  const slides = presentation?.slides || [];
+  console.log(slides, currentSlideIndex)
   // Sort content by the 'layer' property for correct z-index handling
   const sortedContent = (slides[currentSlideIndex]?.content || []).sort((a, b) => a.layer - b.layer);
 
@@ -57,7 +50,7 @@ export const renderSlideContentPreview = () => {
       margin: 0,
       display: 'inline-block',
       overflow: 'hidden',
-      border: '1px solid grey',
+      // border: '1px solid grey',
       width: `${contentItem.properties.width}%`,
       height: `${contentItem.properties.height}%`,
     };

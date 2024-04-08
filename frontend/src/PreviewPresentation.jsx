@@ -1,45 +1,61 @@
 // PreviewPresentation.jsx
 import React, { useState } from 'react';
-import { IconButton, Typography, Box } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { Box, IconButton } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { usePresentations } from './PresentationContext';
+import { renderSlideContentPreview } from './SlideRender';
+import { renderSlideBackground } from './ContentRenderers';
+import config from './config.json';
 
-const PreviewPresentation = ({ slides }) => {
+const PreviewPresentation = () => {
+  const { presentationId } = useParams();
+  const { presentations } = usePresentations();
+  const presentation = presentations.find(p => p.id === presentationId);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  
+  if (!presentation) {
+    return <Box>Loading...</Box>;
+  }
 
-  const handleNextSlide = () => {
-    setCurrentSlideIndex((prevIndex) =>
-      prevIndex < slides.length - 1 ? prevIndex + 1 : prevIndex
-    );
-  };
-
-  const handlePrevSlide = () => {
-    setCurrentSlideIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : 0));
+  const handleMoveSlide = (direction) => {
+    const newIndex = currentSlideIndex + direction;
+    if (newIndex >= 0 && newIndex < presentation.slides.length) {
+      setCurrentSlideIndex(newIndex);
+    }
   };
 
   return (
-    <Box sx={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative' }}>
+    <Box sx={{ width: '95vw', height: '95vh', position: 'relative' }}>
       <Box
         sx={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: slides[currentSlideIndex].backgroundColor || '#fff',
+          width: `${config.deckWidth }px`, 
+          height: `${config.deckHeight }px`, 
+          position: 'relative', 
+          margin: 'auto', 
         }}
       >
-        {/* Render the current slide content here */}
+        <Box 
+          sx={{ 
+            ...renderSlideBackground(presentation.slides, currentSlideIndex), // Apply background style
+            width: '100%', 
+            height: '100%',
+            border: '2px dashed #ccc',
+          }}
+        >
+          {renderSlideContentPreview(presentation.slides, currentSlideIndex)}
+        </Box>
       </Box>
-      <IconButton onClick={handlePrevSlide} sx={{ position: 'absolute', left: 16, top: '50%' }}>
-        <ArrowBackIosNewIcon />
-      </IconButton>
-      <IconButton onClick={handleNextSlide} sx={{ position: 'absolute', right: 16, top: '50%' }}>
-        <ArrowForwardIosIcon />
-      </IconButton>
-      <Typography sx={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)' }}>
-        {currentSlideIndex + 1} / {slides.length}
-      </Typography>
+
+      <Box sx={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 2 }}>
+        <IconButton onClick={() => handleMoveSlide(-1)} disabled={currentSlideIndex === 0}>
+          <ArrowBackIosNewIcon />
+        </IconButton>
+        <IconButton onClick={() => handleMoveSlide(1)} disabled={currentSlideIndex >= presentation.slides.length - 1}>
+          <ArrowForwardIosIcon />
+        </IconButton>
+      </Box>
     </Box>
   );
 };
