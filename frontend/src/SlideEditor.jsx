@@ -1,6 +1,6 @@
-//SlideEditor.jsx
+// SlideEditor.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography, IconButton, Modal, TextField, Button } from '@mui/material';
+import { Box, Typography, IconButton, Button } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -26,7 +26,7 @@ export const SlideEditor = ({ presentationId }) => {
     updateStore,
     updatePresentationSlides,
   } = usePresentations();
-  
+
   const presentation = presentations.find(p => p.id === presentationId);
   const presentationsRef = useRef();
   const slides = presentation?.slides || [];
@@ -51,9 +51,8 @@ export const SlideEditor = ({ presentationId }) => {
         setIsInternalNavigation(false);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slideNumber, presentationId]);
-  
+
   useEffect(() => {
     // Only navigate if the change was triggered internally and the currentSlideIndex is different from URL
     if (isInternalNavigation && parseInt(slideNumber, 10) !== currentSlideIndex + 1) {
@@ -106,7 +105,7 @@ export const SlideEditor = ({ presentationId }) => {
         event.target.style.width = `${displayedWidth}px`;
         event.target.style.height = `${displayedHeight}px`;
       };
-    
+
       // Function to dynamically adjust the video size upon loading (assuming iframe loading)
       const handleVideoLoad = (event) => {
         const desiredWidth = deckWidth * contentItem.properties.size / 100;
@@ -115,7 +114,6 @@ export const SlideEditor = ({ presentationId }) => {
         event.target.style.width = `${desiredWidth}px`;
         event.target.style.height = `${desiredHeight}px`;
       };
-
 
       // Define default box styles for content
       let boxStyles = {
@@ -141,9 +139,11 @@ export const SlideEditor = ({ presentationId }) => {
       }
 
       // Apply border and padding for CODE content
-      if (contentItem.type == 'CODE') {
-        boxStyles = { ...boxStyles, 
-        background: '#f5f5f5',}
+      if (contentItem.type === 'CODE') {
+        boxStyles = {
+          ...boxStyles,
+          background: '#f5f5f5',
+        }
       }
 
       // Style adjustments specifically for image and video content
@@ -170,7 +170,7 @@ export const SlideEditor = ({ presentationId }) => {
       }
 
       const isSelected = selectedContentRef.current?.id === contentItem.id;
-      
+
       // Define the styles for resize handles
       const resizeHandleStyles = {
         position: 'absolute',
@@ -179,14 +179,16 @@ export const SlideEditor = ({ presentationId }) => {
         backgroundColor: 'blue',
         // zIndex: 1000,
       };
-    
-      const resizeHandles = isSelected ? [
-        { id: 'top-left', style: { ...resizeHandleStyles, left: '-2.5px', top: '-2.5px', cursor: 'nwse-resize' } },
-        { id: 'top-right', style: { ...resizeHandleStyles, right: '-2.5px', top: '-2.5px', cursor: 'nesw-resize' } },
-        { id: 'bottom-left', style: { ...resizeHandleStyles, left: '-2.5px', bottom: '-2.5px', cursor: 'nesw-resize' } },
-        { id: 'bottom-right', style: { ...resizeHandleStyles, right: '-2.5px', bottom: '-2.5px', cursor: 'nwse-resize' } },
-      ] : [];
-      
+
+      const resizeHandles = isSelected
+        ? [
+            { id: 'top-left', style: { ...resizeHandleStyles, left: '-2.5px', top: '-2.5px', cursor: 'nwse-resize' } },
+            { id: 'top-right', style: { ...resizeHandleStyles, right: '-2.5px', top: '-2.5px', cursor: 'nesw-resize' } },
+            { id: 'bottom-left', style: { ...resizeHandleStyles, left: '-2.5px', bottom: '-2.5px', cursor: 'nesw-resize' } },
+            { id: 'bottom-right', style: { ...resizeHandleStyles, right: '-2.5px', bottom: '-2.5px', cursor: 'nwse-resize' } },
+          ]
+        : [];
+
       // console.log("re render")
 
       return (
@@ -194,7 +196,7 @@ export const SlideEditor = ({ presentationId }) => {
           key={contentItem.id}
           sx={{
             ...boxStyles,
-            ...(isSelected && { boxShadow: "0 0 0 2px blue" }), // Optional: Highlight the selected box
+            ...(isSelected && { boxShadow: '0 0 0 2px blue' }), // Optional: Highlight the selected box
           }}
           onMouseDown={(e) => handleDragMouseDown(e, contentItem.id)}
           onDoubleClick={() => handleDoubleClickOnContent(contentItem.id)}
@@ -204,7 +206,7 @@ export const SlideEditor = ({ presentationId }) => {
           {contentItem.type === 'IMAGE' && renderImageContent(contentItem, handleImageLoad, contentStyles)}
           {contentItem.type === 'VIDEO' && renderVideoContent(contentItem, handleVideoLoad, contentStyles)}
           {contentItem.type === 'CODE' && renderCodeContent(contentItem, contentStyles)}
-    
+
           {resizeHandles.map(handle => (
             <Box
               key={handle.id}
@@ -219,15 +221,15 @@ export const SlideEditor = ({ presentationId }) => {
 
   // resize and moving================================
   const draggingRef = useRef(false);
-  const [selectedContent, setSelectedContent] = useState(null);
-  const dragStartRef = useRef({x: 0, y: 0});
+  const [, setSelectedContent] = useState(null);
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const selectedContentRef = useRef(null);
 
   const handleDragMouseDown = (e, contentId) => {
     // Prevent default action and event bubbling
     e.preventDefault();
     e.stopPropagation();
-  
+
     const content = slides[currentSlideIndex].content.find(el => el.id === contentId);
     if (!content) return;
 
@@ -235,35 +237,35 @@ export const SlideEditor = ({ presentationId }) => {
     selectedContentRef.current = content;
     // {presentations && console.log("dragging start", presentations[0].slides[0].content[0].properties.position)}
     draggingRef.current = true; // Update to use ref
-    
+
     // Bind mousemove and mouseup handlers to the document
-    dragStartRef.current = {x: e.clientX, y: e.clientY};
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
 
     // Create a closure that captures contentId and passes it to handleMouseMove
     const mouseMoveWithContentId = (event) => handleMouseMove(event, content);
-    
+
     // Similarly, for mouse up, if you need contentId
     const mouseUpWithContentId = (event) => handleMouseUp(event);
 
     const handleMouseMove = (e, content) => {
       if (!draggingRef.current) return; // Use ref to check if dragging
       if (!selectedContentRef.current) return;
-      
+
       // console.log(content.properties.position)
 
       // In handleMouseMove, use dragStartRef.current instead of dragStart
       const dx = (e.clientX - dragStartRef.current.x)
       const dy = (e.clientY - dragStartRef.current.y)
       // console.log("dx, dy:", dx, dy, dragStartRef.current.x, dragStartRef.current.y);
-      
+
       // Calculate new position based on the initial drag start position and the current mouse position
       const moveXPercentage = (dx / deckWidth) * 100;
       const moveYPercentage = (dy / deckHeight) * 100;
-  
+
       // Assuming you have the content's width and height in percentages as contentWidthPercentage and contentHeightPercentage
       const contentWidthPercentage = content.properties.width;
       const contentHeightPercentage = content.properties.height;
-  
+
       // Calculate new position percentages based on movement
       const newXPercentage = content.properties.position.x + moveXPercentage;
       const newYPercentage = content.properties.position.y + moveYPercentage;
@@ -271,21 +273,21 @@ export const SlideEditor = ({ presentationId }) => {
       // Clamp the new X position to ensure the content doesn't go beyond the right slide boundary
       const maxPossibleX = 100 - contentWidthPercentage; // Subtract content width from 100% to get the maximum possible X
       const clampedX = Math.min(Math.max(newXPercentage, 0), maxPossibleX);
-  
+
       // Clamp the new Y position to ensure the content doesn't go beyond the bottom slide boundary
       const maxPossibleY = 100 - contentHeightPercentage; // Subtract content height from 100% to get the maximum possible Y
       const clampedY = Math.min(Math.max(newYPercentage, 0), maxPossibleY);
-  
+
       // Update position using the clamped values
       updateContentStateOnSlide(
         presentationId,
         slides[currentSlideIndex].id,
         selectedContentRef.current.id,
-        { properties: {position: { x: clampedX, y: clampedY }} }
+        { properties: { position: { x: clampedX, y: clampedY } } }
       );
       // {presentations && console.log("dragging", presentations[0].slides[0].content[0].properties.position)}
     };
-  
+
     const handleMouseUp = (e) => {
       if (!draggingRef.current) return; // Check if dragging using ref
 
@@ -297,13 +299,13 @@ export const SlideEditor = ({ presentationId }) => {
       document.removeEventListener('mousemove', mouseMoveWithContentId);
       document.removeEventListener('mouseup', mouseUpWithContentId);
     };
-    
+
     // if (selectedContent) console.log("try to add handler", content.properties.position)
     document.addEventListener('mousemove', mouseMoveWithContentId);
     document.addEventListener('mouseup', mouseUpWithContentId);
   };
 
-  //============================
+  //= ===========================
   // Add to your component state
   const originalPositionRef = useRef({ x: 0, y: 0 });
   const resizingRef = useRef(false);
@@ -313,10 +315,10 @@ export const SlideEditor = ({ presentationId }) => {
   const handleResizeMouseDown = (e, contentId, corner) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const content = slides[currentSlideIndex].content.find(item => item.id === contentId);
     if (!content) return;
-    
+
     resizingRef.current = true; // Use ref to track resizing state
     setSelectedContent(content);
     selectedContentRef.current = content;
@@ -330,21 +332,21 @@ export const SlideEditor = ({ presentationId }) => {
 
     const handleMouseMoveDuringResize = (moveEvent) => {
       if (!resizingRef.current) return;
-  
+
       const deckRect = deckRef.current.getBoundingClientRect();
       const isInDeckX = moveEvent.clientX >= deckRect.left && moveEvent.clientX <= deckRect.right;
       const isInDeckY = moveEvent.clientY >= deckRect.top && moveEvent.clientY <= deckRect.bottom;
       if (!isInDeckX || !isInDeckY) return;
-  
+
       // Calculate the change in mouse position as a percentage of deck dimensions
       const dxPercentage = ((moveEvent.clientX / deckWidth) * 100) - initialMouseXPercentage;
       const dyPercentage = ((moveEvent.clientY / deckHeight) * 100) - initialMouseYPercentage;
-  
+
       // Determine the original aspect ratio
       const aspectRatio = originalSizeRef.current.width / originalSizeRef.current.height;
-  
+
       let newWidth, newHeight, newX, newY;
-      switch(corner) {
+      switch (corner) {
         case 'bottom-right':
           // Calculate new width or height while maintaining aspect ratio
           newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
@@ -368,33 +370,34 @@ export const SlideEditor = ({ presentationId }) => {
           // Calculate new sizes inversely proportional to the drag directions
           newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
           newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
-        
+
           // Adjust the X and Y position to move in accordance with the size adjustments
           // As we're reducing the width/height (by dragging towards the top-left), we need to move the position left/upwards
           newX = originalPositionRef.current.x + (originalSizeRef.current.width - newWidth);
           newY = originalPositionRef.current.y + (originalSizeRef.current.height - newHeight);
           break;
       }
-  
+
       // Clamp new position to prevent out-of-bounds
       newX = Math.max(Math.min(newX, 100 - newWidth), 0);
       newY = Math.max(Math.min(newY, 100 - newHeight), 0);
-  
+
       // Update the size and position
       updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContentRef.current.id, {
-        properties: {width: newWidth,
-        height: newHeight,
-        position: { x: newX, y: newY }}
+        properties: {
+          width: newWidth,
+          height: newHeight,
+          position: { x: newX, y: newY }
+        }
       });
     };
-    
-  
+
     const handleMouseUpAfterResize = () => {
       if (!resizingRef.current) return; // Check ref instead of state
 
       updateStore(presentationsRef.current)
       resizingRef.current = false; // Update ref to indicate resizing end
-    
+
       document.removeEventListener('mousemove', handleMouseMoveDuringResize);
       document.removeEventListener('mouseup', handleMouseUpAfterResize);
     };
@@ -430,12 +433,11 @@ export const SlideEditor = ({ presentationId }) => {
       // console.log("hhhhhhhhhhhhhhhh")
     }
   };
-  
+
   const handleDoubleClickOnContent = (contentId) => {
     const contentToEdit = slides[currentSlideIndex].content.find(content => content.id === contentId);
     setEditingContent(contentToEdit);
   };
-
 
   const [isBackgroundPickerOpen, setBackgroundPickerOpen] = useState(false);
 
@@ -455,10 +457,10 @@ export const SlideEditor = ({ presentationId }) => {
       // Gradient
       backgroundStyle = `linear-gradient(${gradientDirection}, ${color1}, ${color2})`;
     }
-  
+
     // Clone the slides array to avoid direct mutation
     let updatedSlides = [...slides];
-  
+
     if (applyTo === 'currentSlide') {
       // Option 1: Apply background to the current slide only
       updatedSlides[currentSlideIndex] = {
@@ -469,10 +471,10 @@ export const SlideEditor = ({ presentationId }) => {
       // Option 2: Apply as default background color for all slides
       updatedSlides = updatedSlides.map(slide => ({ ...slide, backgroundColor: backgroundStyle }));
     }
-  
+
     // Update presentations with the new slides array
     await updatePresentationSlides(presentationId, updatedSlides);
-  
+
     // Assuming updatePresentationSlides updates your state, the component should re-render with the new backgrounds
   };
 
@@ -481,7 +483,7 @@ export const SlideEditor = ({ presentationId }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', overflow: 'hidden', alignItems: 'stretch'}}>
+    <Box sx={{ display: 'flex', overflow: 'hidden', alignItems: 'stretch' }}>
       <SlideSidebar
         editingContent={editingContent}
         setEditingContent={setEditingContent}
@@ -489,9 +491,9 @@ export const SlideEditor = ({ presentationId }) => {
         presentation={presentation}
         sx={{ width: '220px', flexShrink: 0 }} // Add this line to set the width
       />
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
         flexDirection: 'column',
         alignItems: 'center', // Center children horizontally in the column direction
         justifyContent: 'center', // Center children vertically
@@ -514,7 +516,7 @@ export const SlideEditor = ({ presentationId }) => {
           {renderSlideContent()}
         </Box>
 
-        <Box sx={{ p: 0, display: 'flex', justifyContent: 'normal', alignItems: 'center'}}>
+        <Box sx={{ p: 0, display: 'flex', justifyContent: 'normal', alignItems: 'center' }}>
           <IconButton onClick={() => handleMoveSlide(-1)} disabled={currentSlideIndex === 0}>
             <ArrowBackIosNewIcon />
           </IconButton>
@@ -525,13 +527,13 @@ export const SlideEditor = ({ presentationId }) => {
             <AddCircleOutlineIcon />
           </IconButton>
           {slides.length > 1 && (
-            <IconButton 
+            <IconButton
               onClick={() => {
                 const slide = slides[currentSlideIndex];
                 if (slide) {
                   handleDeleteSlide(slide.id);
                 }
-              }} 
+              }}
               color="error"
             >
               <DeleteIcon />
@@ -550,7 +552,7 @@ export const SlideEditor = ({ presentationId }) => {
           />
           <Button onClick={handlePreview}>Preview</Button>
         </Box>
-        
+
       </Box>
     </Box>
   );

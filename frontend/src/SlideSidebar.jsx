@@ -1,6 +1,6 @@
 // SlideSidebar.jsx
-import React, { useState, useContext, useEffect} from 'react';
-import { Box, Button, Typography, TextField, Slider, MenuItem, Drawer, FormControlLabel, Switch} from '@mui/material';
+import React, { useState, useContext, useEffect } from 'react';
+import { Box, Button, Typography, TextField, Slider, MenuItem, Drawer, FormControlLabel, Switch } from '@mui/material';
 // Import your context if using context for state management
 import { usePresentations } from './PresentationContext';
 
@@ -25,16 +25,16 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
     videoUrl: '',
     autoPlay: false,
     code: '',
-    fontFamily: "Arial, sans-serif", // Assuming you're including the font family adjustment feature
+    fontFamily: 'Arial, sans-serif', // Assuming you're including the font family adjustment feature
   };
   const [contentProperties, setContentProperties] = useState(defaultContentProperties);
-  
+
   const availableFonts = [
-    { label: "Arial", value: "Arial, sans-serif" },
-    { label: "Verdana", value: "Verdana, sans-serif" },
-    { label: "Helvetica", value: "Helvetica, sans-serif" },
-    { label: "Times New Roman", value: "'Times New Roman', serif" },
-    { label: "Courier New", value: "'Courier New', monospace" },
+    { label: 'Arial', value: 'Arial, sans-serif' },
+    { label: 'Verdana', value: 'Verdana, sans-serif' },
+    { label: 'Helvetica', value: 'Helvetica, sans-serif' },
+    { label: 'Times New Roman', value: "'Times New Roman', serif" },
+    { label: 'Courier New', value: "'Courier New', monospace" },
     // Add more fonts as needed
   ];
 
@@ -48,13 +48,17 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
     setShowPropertiesInput(true)
   }, [editingContent]);
 
+  useEffect(() => {
+    setShowPropertiesInput(false)
+  }, []);
+
   const handleChange = (name, value) => {
     setContentProperties(prev => ({
       ...prev,
       [name]: typeof value === 'object' && value !== null ? { ...prev[name], ...value } : value
     }));
   };
-  
+
   // Handle Add or Update based on editing mode
   const handleSaveContent = async () => {
     const slideId = presentation.slides[currentSlideIndex].id;
@@ -124,8 +128,8 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           ))}
         </TextField>
       </>
-    );    
-  
+    );
+
     const imageFields = (
       <>
         <TextField
@@ -146,7 +150,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
         />
       </>
     );
-  
+
     const videoFields = (
       <>
         <TextField
@@ -169,7 +173,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
         />
       </>
     );
-  
+
     const codeFields = (
       <>
         <TextField
@@ -194,7 +198,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
         />
       </>
     );
-  
+
     // Dynamically render input fields based on the selected element type
     let specificFields;
     switch (elementType) {
@@ -213,7 +217,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
       default:
         specificFields = null;
     }
-  
+
     // Only display size sliders when not in editing mode
     const sizeSliders = !editingContent && (
       <>
@@ -239,7 +243,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
         />
       </>
     );
-  
+
     return (
       <>
         {specificFields}
@@ -283,15 +287,15 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
         <>
           {renderPropertiesInput()}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
+            <Button
+              variant="contained"
+              color="primary"
               onClick={handleSaveAndHideProperties}
             >
               {editingContent ? 'Update Content' : 'Add Content'}
             </Button>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={handleHidePropertiesInput}
             >
               Back

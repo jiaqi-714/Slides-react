@@ -1,8 +1,8 @@
-//Login.jsx
+// Login.jsx
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
 import config from './config.json';
-import { useLocation, useNavigate, Link} from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './AuthContext'; // Make sure the path is correct
 
 export const Login = ({ onLogin }) => {
@@ -13,7 +13,7 @@ export const Login = ({ onLogin }) => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const { login, isAuthenticated } = useAuth(); // Destructure to get login function from the context
 
-  //jump to dashborad if user is isAuthenticated
+  // jump to dashborad if user is isAuthenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard');
@@ -93,7 +93,7 @@ export const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessa
     });
 
     if (!response.ok) {
-      const errorResponse = await response.json(); 
+      const errorResponse = await response.json();
       console.log(errorResponse)
       const errorMessage = errorResponse.error || 'Login failed';
       throw new Error(errorMessage);
@@ -117,15 +117,17 @@ export function LoginNav () {
 
   return (
     <div>
-      {location.pathname === '/register' ? (
+      {location.pathname === '/register'
+        ? (
         <p>
           Already have an account? <Link to="/login" style={{ color: 'blue' }}>Login here.</Link>
         </p>
-      ) : (
+          )
+        : (
         <p>
           Haven&apos;t registered yet? <Link to="/register" style={{ color: 'blue' }}>Register here.</Link>
         </p>
-      )}
+          )}
     </div>
   );
 }

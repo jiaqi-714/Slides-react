@@ -1,4 +1,4 @@
-//NavBar.jsx
+// NavBar.jsx
 import React from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -30,7 +30,7 @@ export const NavBar = ({ presentationControls }) => {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+        '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' },
       }}
     >
       <Box sx={{ overflow: 'auto' }}>

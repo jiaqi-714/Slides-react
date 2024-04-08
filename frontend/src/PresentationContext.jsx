@@ -1,7 +1,6 @@
 // PresentationContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import config from './config.json';
-import { useAuth } from './AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 
 const PresentationContext = createContext();
@@ -14,49 +13,47 @@ export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
   // New states for tracking current presentation and slide IDs
 
-  const { isAuthenticated } = useAuth(); // Destructure to get login function from the context
-
   useEffect(() => {
     const fetchPresentations = async () => {
       try {
-        const response = await fetch(backendURL, { 
-          method: 'GET', 
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const response = await fetch(backendURL, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched presentations:", data.store);
-          const presentations = data.store.store.presentations; 
-          console.log("presentations:", presentations);
+          console.log('Fetched presentations:', data.store);
+          const presentations = data.store.store.presentations;
+          console.log('presentations:', presentations);
           const presentationsArray = presentations || [];
           setPresentations(presentationsArray);
         }
       } catch (error) {
-        console.error("Failed to fetch presentations", error);
+        console.error('Failed to fetch presentations', error);
       }
     };
     fetchPresentations();
-  }, []);  
-  
+  }, []);
+
   const addPresentation = async (newPresentation) => {
     const presentationWithId = {
       ...newPresentation,
       id: uuidv4(), // This assigns a unique UUID
       slides: [], // Assuming presentations include a slides array
     };
-    
+
     const updatedPresentations = [...presentations, presentationWithId];
     addSlideToPresentation(presentationWithId.id, updatedPresentations)
     // await updateStore(updatedPresentations);
   };
-  
+
   const deletePresentation = async (presentationId) => {
     const updatedPresentations = presentations.filter(p => p.id !== presentationId);
     await updateStore(updatedPresentations);
   };
 
   const updatePresentationTitle = async (presentationId, newTitle) => {
-    const updatedPresentations = presentations.map(presentation => 
+    const updatedPresentations = presentations.map(presentation =>
       presentation.id === presentationId ? { ...presentation, name: newTitle } : presentation
     );
     await updateStore(updatedPresentations);
@@ -64,26 +61,55 @@ export const PresentationProvider = ({ children }) => {
 
   const addSlideToPresentation = async (presentationId, providedUpdatedPresentations) => {
     // Use the provided updatedPresentations if it exists, otherwise fall back to the current presentations state
-    let workingPresentations = providedUpdatedPresentations || presentations;
-  
-    let updatedPresentations = workingPresentations.map(presentation => {
+    const workingPresentations = providedUpdatedPresentations || presentations;
+
+    const updatedPresentations = workingPresentations.map(presentation => {
       if (presentation.id === presentationId) {
         // Initialize slides as an empty array if it doesn't exist
         const existingSlides = Array.isArray(presentation.slides) ? presentation.slides : [];
         // Create a new slide object. Customize as needed.
-        const newSlide = { id: uuidv4(), content: [], backgroundColor: '#ffffff'};
-        console.log("create slide successful")
+        const newSlide = {
+          id: uuidv4(),
+          content: [
+            {
+              type: 'TEXT',
+              properties: {
+                position: {
+                  x: 38.02083333333333,
+                  y: 36.857142857142854
+                },
+                size: 50,
+                width: 25.625,
+                height: 25.625,
+                text: 'New Slide',
+                fontSize: 2.6,
+                color: '#000000',
+                imageUrl: '',
+                imageAlt: '',
+                isBase64: false,
+                videoUrl: '',
+                autoPlay: false,
+                code: '',
+                fontFamily: "'Times New Roman', serif"
+              },
+              id: '11b0a1b1-c865-4e51-ad4d-ae2f14f06017',
+              layer: 0
+            }
+          ],
+          backgroundColor: '#ffffff'
+        };
+        // console.log("create slide successful")
         return { ...presentation, slides: [...existingSlides, newSlide] };
       }
       return presentation;
     });
-  
+
     // Update state and backend
     await updateStore(updatedPresentations);
   };
 
   const updatePresentationSlides = async (presentationId, slides) => {
-    let updatedPresentations = presentations.map(presentation => 
+    const updatedPresentations = presentations.map(presentation =>
       presentation.id === presentationId ? { ...presentation, slides } : presentation
     );
 
@@ -96,14 +122,14 @@ export const PresentationProvider = ({ children }) => {
     setPresentations(updatedPresentations);
     await fetch(backendURL, {
       method: 'PUT',
-      headers: { 
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ store: { presentations: updatedPresentations } }),
     });
     // Optionally, you can log or handle the response here
-  };  
+  };
 
   const deleteSlide = async (presentationId, slideId) => {
     // Find the presentation and remove the slide
@@ -115,13 +141,13 @@ export const PresentationProvider = ({ children }) => {
       }
       return presentation;
     });
-  
+
     // Update state and backend
     await updateStore(updatedPresentations);
   };
 
   const addContentToSlide = async (presentationId, slideId, content) => {
-    let updatedPresentations = presentations.map(presentation => {
+    const updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         const updatedSlides = presentation.slides.map(slide => {
           if (slide.id === slideId) {
@@ -146,9 +172,8 @@ export const PresentationProvider = ({ children }) => {
     await updateStore(updatedPresentations);
   };
 
-  
   const updateContentStateOnSlide = (presentationId, slideId, contentId, updates) => {
-    let updatedPresentations = presentations.map(presentation => {
+    const updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         const updatedSlides = presentation.slides.map(slide => {
           if (slide.id === slideId) {
@@ -180,7 +205,7 @@ export const PresentationProvider = ({ children }) => {
   };
 
   const updateContentOnSlide = async (presentationId, slideId, contentId, updates) => {
-    let updatedPresentations = presentations.map(presentation => {
+    const updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         const updatedSlides = presentation.slides.map(slide => {
           if (slide.id === slideId) {
@@ -208,15 +233,13 @@ export const PresentationProvider = ({ children }) => {
       }
       return presentation;
     });
-  
+
     // Update state and backend
     await updateStore(updatedPresentations);
   };
 
-
   const deleteContentFromSlide = async (presentationId, slideId, contentId) => {
-
-    let updatedPresentations = presentations.map(presentation => {
+    const updatedPresentations = presentations.map(presentation => {
       if (presentation.id === presentationId) {
         // Find the slide and filter out the content by contentId
         const updatedSlides = presentation.slides.map(slide => {

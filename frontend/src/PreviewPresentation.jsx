@@ -21,7 +21,7 @@ const PreviewPresentation = () => {
     // Check if the presentation and slideNumber are defined and prevent effect on internal navigation
     if (presentation && slideNumber && !isInternalNavigation) {
       const slideIndex = parseInt(slideNumber, 10) - 1;
-      
+
       // Validate slideIndex is within bounds
       if (slideIndex >= 0 && slideIndex < presentation.slides.length) {
         setCurrentSlideIndex(slideIndex);
@@ -40,7 +40,7 @@ const PreviewPresentation = () => {
       navigate(`/presentation/${presentationId}/preview/${currentSlideIndex + 1}`, { replace: true });
     }
   }, [currentSlideIndex, isInternalNavigation, navigate, presentationId, slideNumber]);
-  
+
   if (!presentation) {
     return <Box>Loading...</Box>;
   }
@@ -57,16 +57,16 @@ const PreviewPresentation = () => {
     <Box sx={{ width: '95vw', height: '95vh', position: 'relative' }}>
       <Box
         sx={{
-          width: `${config.deckWidth }px`, 
-          height: `${config.deckHeight }px`, 
-          position: 'relative', 
-          margin: 'auto', 
+          width: `${config.deckWidth}px`,
+          height: `${config.deckHeight}px`,
+          position: 'relative',
+          margin: 'auto',
         }}
       >
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             ...renderSlideBackground(presentation.slides, currentSlideIndex), // Apply background style
-            width: '100%', 
+            width: '100%',
             height: '100%',
             border: '2px dashed #ccc',
           }}

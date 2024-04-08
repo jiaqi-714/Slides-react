@@ -1,4 +1,4 @@
-//Register.jsx
+// Register.jsx
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
 import config from './config.json';

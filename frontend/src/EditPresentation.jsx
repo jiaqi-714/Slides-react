@@ -1,7 +1,7 @@
-//EditPresentation.jsx
+// EditPresentation.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Box, Typography, Modal, TextField, IconButton } from '@mui/material';
+import { Button, Box, Typography, Modal, TextField } from '@mui/material';
 import { usePresentations } from './PresentationContext'; // Ensure correct path
 import { SlideEditor } from './SlideEditor';
 import MainLayout from './MainLayout';
@@ -19,13 +19,13 @@ export const EditPresentation = () => {
   const { presentations, deletePresentation, updatePresentationTitle } = usePresentations();
 
   const presentation = presentations.find(p => p.id === presentationId);
-  
+
   useEffect(() => {
     setNewTitle(presentation?.name || '');
   }, [presentation]);
 
   const handleDelete = async () => {
-    const isConfirmed = window.confirm("Are you sure?");
+    const isConfirmed = window.confirm('Are you sure?');
     if (isConfirmed) {
       await deletePresentation(presentationId);
       navigate('/dashboard');
@@ -35,7 +35,7 @@ export const EditPresentation = () => {
   const handleEditTitleOpen = () => {
     setEditTitleOpen(true);
   };
-  
+
   const handleUpdateTitle = async () => {
     await updatePresentationTitle(presentationId, newTitle);
     setEditTitleOpen(false);
@@ -45,14 +45,16 @@ export const EditPresentation = () => {
     navigate('/dashboard');
   };
 
-  const presentationControls = presentation ? {
-    title: `Editing Presentation: ${presentation?.name}`,
-    actions: [
-      { label: 'Back', onClick: handleBack },
-      { label: 'Edit Title', onClick: handleEditTitleOpen },
-      { label: 'Delete Presentation', onClick: handleDelete, color: 'error' },
-    ],
-  } : null; // Fallback to null if presentation is not defined
+  const presentationControls = presentation
+    ? {
+        title: `Editing Presentation: ${presentation?.name}`,
+        actions: [
+          { label: 'Back', onClick: handleBack },
+          { label: 'Edit Title', onClick: handleEditTitleOpen },
+          { label: 'Delete Presentation', onClick: handleDelete, color: 'error' },
+        ],
+      }
+    : null; // Fallback to null if presentation is not defined
 
   if (!presentation) {
     return <Typography>Loading...</Typography>;
@@ -60,7 +62,7 @@ export const EditPresentation = () => {
 
   return (
     <MainLayout NavBarComponent={NavBar} navBarProps={{ presentationControls }}>
-      <Box sx={{ margin: 0}}>
+      <Box sx={{ margin: 0 }}>
 
         <SlideEditor presentationId={presentationId} />
 
@@ -102,10 +104,10 @@ export const EditPresentation = () => {
                 }
               }}
             />
-            <Button 
-              onClick={handleUpdateTitle} 
-              variant="contained" 
-              color="primary" 
+            <Button
+              onClick={handleUpdateTitle}
+              variant="contained"
+              color="primary"
               sx={{
                 ':hover': {
                   backgroundColor: 'primary.dark',

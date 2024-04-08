@@ -1,5 +1,5 @@
 
-//SlideRender.jsx
+// SlideRender.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { renderTextContent, renderImageContent, renderVideoContent, renderCodeContent } from './ContentRenderers';
@@ -26,7 +26,7 @@ export const renderSlideContentPreview = (slides, currentSlideIndex) => {
       event.target.style.width = `${displayedWidth}px`;
       event.target.style.height = `${displayedHeight}px`;
     };
-  
+
     // Function to dynamically adjust the video size upon loading (assuming iframe loading)
     const handleVideoLoad = (event) => {
       const desiredWidth = deckWidth * contentItem.properties.size / 100;
@@ -35,7 +35,6 @@ export const renderSlideContentPreview = (slides, currentSlideIndex) => {
       event.target.style.width = `${desiredWidth}px`;
       event.target.style.height = `${desiredHeight}px`;
     };
-
 
     // Define default box styles for content
     let boxStyles = {
@@ -62,8 +61,10 @@ export const renderSlideContentPreview = (slides, currentSlideIndex) => {
 
     // Apply border and padding for CODE content
     if (contentItem.type == 'CODE') {
-      boxStyles = { ...boxStyles, 
-      background: '#f5f5f5',}
+      boxStyles = {
+        ...boxStyles,
+        background: '#f5f5f5',
+      }
     }
 
     // Style adjustments specifically for image and video content

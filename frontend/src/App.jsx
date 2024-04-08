@@ -1,7 +1,7 @@
-//App.jsx
-import React, { useEffect } from 'react';
+// App.jsx
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Login, onLogin, LoginNav} from './Login';
+import { Login, onLogin, LoginNav } from './Login';
 import { Register, onRegister } from './Register';
 import { Dashboard } from './Dashboard';
 import { AuthProvider } from './AuthContext'; // Import the AuthProvider
@@ -13,7 +13,7 @@ import MainLayout from './MainLayout'
 import { NavBar } from './NavBar';
 import PreviewPresentation from './PreviewPresentation'; // Adjust the path as necessary
 
-function App() {
+function App () {
   return (
     <AuthProvider>
       <PresentationProvider>

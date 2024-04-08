@@ -18,7 +18,6 @@ export const renderTextContent = (contentItem) => (
 
 // Render Image Content
 export const renderImageContent = (contentItem, handleImageLoad, contentStyles) => {
-
   return (
     <img
       src={contentItem.properties.isBase64 ? `data:image/jpeg;base64,${contentItem.properties.imageUrl}` : contentItem.properties.imageUrl}
@@ -54,7 +53,7 @@ export const renderCodeContent = (contentItem, contentStyles) => {
 const constructVideoSrc = (videoUrl, autoplay) => {
   const videoId = extractYouTubeVideoID(videoUrl);
   const baseUrl = `https://www.youtube.com/embed/${videoId}`;
-  const autoplayParam = autoplay ? "?autoplay=1&mute=1" : "";
+  const autoplayParam = autoplay ? '?autoplay=1&mute=1' : '';
   return `${baseUrl}${autoplayParam}`;
 };
 
