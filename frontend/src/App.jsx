@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Login, onLogin, LoginNav } from './Login';
-import { Register, onRegister } from './Register';
+import { Register } from './Register';
 import { Dashboard } from './Dashboard';
 import { AuthProvider } from './AuthContext'; // Import the AuthProvider
 import CenteredLayout from './CenteredLayout'; // Import the layout component
@@ -27,7 +27,7 @@ function App () {
             } />
             <Route path="/register" element={
               <CenteredLayout>
-                <Register onRegister={onRegister}/>
+                <Register />
                 <LoginNav />
               </CenteredLayout>
             } />

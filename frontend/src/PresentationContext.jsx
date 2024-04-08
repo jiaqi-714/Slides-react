@@ -1,5 +1,6 @@
 // PresentationContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext'; // Import useAuth from AuthContext
 import config from './config.json';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,29 +12,37 @@ const backendURL = `http://localhost:${config.BACKEND_PORT}/store`; // Use the p
 
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
-  // New states for tracking current presentation and slide IDs
+  const { isAuthenticated } = useAuth(); // Use the useAuth hook to access authentication state
 
   useEffect(() => {
+    // Function to fetch presentations
     const fetchPresentations = async () => {
-      try {
-        const response = await fetch(backendURL, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Fetched presentations:', data.store);
-          const presentations = data.store.store.presentations;
-          console.log('presentations:', presentations);
-          const presentationsArray = presentations || [];
-          setPresentations(presentationsArray);
+      // Fetch presentations only if the user is authenticated
+      if (isAuthenticated) {
+        try {
+          const response = await fetch(backendURL, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const presentationsArray = data.store.store.presentations || [];
+            setPresentations(presentationsArray);
+          }
+        } catch (error) {
+          console.error('Failed to fetch presentations', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch presentations', error);
       }
     };
     fetchPresentations();
-  }, []);
+  }, [isAuthenticated]); // Re-run this effect when isAuthenticated changes
+
+  // Reset presentations when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setPresentations([]); // Clear presentations if not authenticated
+    }
+  }, [isAuthenticated]);
 
   const addPresentation = async (newPresentation) => {
     const presentationWithId = {

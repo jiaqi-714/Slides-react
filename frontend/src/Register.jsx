@@ -1,25 +1,60 @@
 // Register.jsx
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
+// import { useNavigate } from 'react-router-dom';
 import config from './config.json';
 
-export const Register = ({ onRegister }) => {
+export const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error'); // Default to 'error'
+  // const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setSnackbarMessage('Passwords do not match.');
+      setSnackbarSeverity('error'); // Ensure the severity is set for an error
       setOpenSnackbar(true);
       return;
     }
-    // Implement registration logic here
-    onRegister(name, email, password, setOpenSnackbar, setSnackbarMessage);
+    // Pass handleSuccess as a callback to onRegister
+    onRegister();
+  };
+
+  // Updated onRegister function to accept parameters for handling success
+  const onRegister = async () => {
+    try {
+      const backendURL = `http://localhost:${config.BACKEND_PORT}/admin/auth/register`;
+      const response = await fetch(backendURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        const errorMessage = errorResponse.error || 'Registration failed';
+        throw new Error(errorMessage);
+      }
+
+      // Handle successful registration
+      console.log('Registration successful');
+      setSnackbarMessage('Registration successful. Please log in.');
+      setSnackbarSeverity('success'); // Update the severity for success
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error(error);
+      setSnackbarMessage(error.message);
+      setOpenSnackbar(true);
+      setSnackbarSeverity('error'); // Ensure the severity is set for an error
+    }
   };
 
   return (
@@ -90,37 +125,10 @@ export const Register = ({ onRegister }) => {
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }} // Adjusts the anchor position
       >
-        <Alert onClose={() => setOpenSnackbar(false)} severity="error" sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
+      <Alert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        {snackbarMessage}
+      </Alert>
       </Snackbar>
     </Container>
   );
-};
-
-export const onRegister = async (name, email, password, setOpenSnackbar, setSnackbarMessage) => {
-  try {
-    const backendURL = `http://localhost:${config.BACKEND_PORT}/admin/auth/register`; // Use the port from config
-    const response = await fetch(backendURL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    console.log(name, email, password);
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      console.log(errorResponse)
-      const errorMessage = errorResponse.error || 'Login failed';
-      throw new Error(errorMessage);
-    }
-    // Handle successful registration, e.g., redirect to login or dashboard
-    console.log('Registration successful');
-  } catch (error) {
-    console.error(error);
-    setSnackbarMessage(error.message);
-    setOpenSnackbar(true);
-  }
 };
