@@ -5,8 +5,7 @@ import { Box, IconButton } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { usePresentations } from './PresentationContext';
-import { renderSlideContentPreview } from './SlideRender';
-import { renderSlideBackground } from './ContentRenderers';
+import { renderSlideContentNew, renderSlideBackground } from './ContentRenderers';
 import config from './config.json';
 
 const PreviewPresentation = () => {
@@ -71,7 +70,11 @@ const PreviewPresentation = () => {
             border: '2px dashed #ccc',
           }}
         >
-          {renderSlideContentPreview(presentation.slides, currentSlideIndex)}
+          {renderSlideContentNew({
+            slides: presentation.slides, // Replace with your slides data array
+            currentSlideIndex, // Replace with the index of the current slide
+            preview: true,
+          })}
         </Box>
       </Box>
 
