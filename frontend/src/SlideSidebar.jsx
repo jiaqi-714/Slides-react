@@ -149,6 +149,16 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           value={contentProperties.imageAlt}
           onChange={(e) => handleChange('imageAlt', e.target.value)}
         />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={contentProperties.isBase64}
+              onChange={(e) => handleChange('isBase64', e.target.checked)}
+              name="isBase64"
+            />
+          }
+          label="Is Base64"
+        />
       </>
     );
 

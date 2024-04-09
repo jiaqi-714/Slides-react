@@ -214,27 +214,24 @@ export const SlideEditor = ({ presentationId }) => {
       const dxPercentage = ((moveEvent.clientX / deckWidth) * 100) - initialMouseXPercentage;
       const dyPercentage = ((moveEvent.clientY / deckHeight) * 100) - initialMouseYPercentage;
 
-      // Determine the original aspect ratio
-      const aspectRatio = originalSizeRef.current.width / originalSizeRef.current.height;
-
       let newWidth, newHeight, newX, newY;
       switch (corner) {
         case 'bottom-right':
           // Calculate new width or height while maintaining aspect ratio
           newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
-          newHeight = newWidth / aspectRatio; // Calculate new height based on aspect ratio
+          newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
           newX = originalPositionRef.current.x;
           newY = originalPositionRef.current.y;
           break;
         case 'top-right':
           newWidth = Math.max(originalSizeRef.current.width + dxPercentage, 1);
-          newHeight = newWidth / aspectRatio; // Maintain aspect ratio
+          newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
           newX = originalPositionRef.current.x;
           newY = originalPositionRef.current.y - (newHeight - originalSizeRef.current.height); // Adjust Y to compensate for height increase
           break;
         case 'bottom-left':
+          newWidth = Math.max(originalSizeRef.current.width - dxPercentage, 1);
           newHeight = Math.max(originalSizeRef.current.height + dyPercentage, 1);
-          newWidth = newHeight * aspectRatio; // Maintain aspect ratio
           newX = originalPositionRef.current.x - (newWidth - originalSizeRef.current.width); // Adjust X to compensate for width increase
           newY = originalPositionRef.current.y;
           break;
