@@ -94,11 +94,11 @@ const handleImageLoad = (event, contentItem) => {
 
 // Function to dynamically adjust the video size upon loading (assuming iframe loading)
 const handleVideoLoad = (event, contentItem) => {
-  const desiredWidth = deckWidth * contentItem.properties.size / 100;
-  const aspectRatio = 16 / 9; // Maintain a 16:9 aspect ratio
-  const desiredHeight = desiredWidth / aspectRatio;
-  event.target.style.width = `${desiredWidth}px`;
-  event.target.style.height = `${desiredHeight}px`;
+  const sizeRatio = 0.95;
+  const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio; // Adjust calculation as needed
+  const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio; // Adjust calculation as needed
+  event.target.style.width = `${displayedWidth}px`;
+  event.target.style.height = `${displayedHeight}px`;
 };
 
 export const renderSlideContentNew = ({
@@ -164,8 +164,13 @@ export const renderSlideContentNew = ({
         height: `${displayedHeight}px` || 'auto'
       };
     } else if (contentItem.type === 'VIDEO') {
+      const sizeRatio = 0.95;
+      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio; // Adjust calculation as needed
+      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio; // Adjust calculation as needed
       contentStyles = {
         aspectRatio: '16 / 9',
+        width: `${displayedWidth}px` || 'auto',
+        height: `${displayedHeight}px` || 'auto',
       };
     } else if (contentItem.type === 'CODE') {
       contentStyles = {
@@ -181,18 +186,51 @@ export const renderSlideContentNew = ({
     // Define the styles for resize handles
     const resizeHandleStyles = {
       position: 'absolute',
-      width: '5px',
-      height: '5px',
-      backgroundColor: 'blue',
-      // zIndex: 1000,
+      width: '10px', // Increase the width
+      height: '10px', // Increase the height
+      backgroundColor: 'transparent', // Make the background transparent
+      borderRadius: '50%', // Make the resize handles circular
+      border: '2px solid #007bff', // Add a blue border
     };
 
     const resizeHandles = isSelected
       ? [
-          { id: 'top-left', style: { ...resizeHandleStyles, left: '-2.5px', top: '-2.5px', cursor: 'nwse-resize' } },
-          { id: 'top-right', style: { ...resizeHandleStyles, right: '-2.5px', top: '-2.5px', cursor: 'nesw-resize' } },
-          { id: 'bottom-left', style: { ...resizeHandleStyles, left: '-2.5px', bottom: '-2.5px', cursor: 'nesw-resize' } },
-          { id: 'bottom-right', style: { ...resizeHandleStyles, right: '-2.5px', bottom: '-2.5px', cursor: 'nwse-resize' } },
+          {
+            id: 'top-left',
+            style: {
+              ...resizeHandleStyles,
+              left: '-5px', // Adjust the left position
+              top: '-5px', // Adjust the top position
+              cursor: 'nwse-resize',
+            },
+          },
+          {
+            id: 'top-right',
+            style: {
+              ...resizeHandleStyles,
+              right: '-5px', // Adjust the right position
+              top: '-5px', // Adjust the top position
+              cursor: 'nesw-resize',
+            },
+          },
+          {
+            id: 'bottom-left',
+            style: {
+              ...resizeHandleStyles,
+              left: '-5px', // Adjust the left position
+              bottom: '-5px', // Adjust the bottom position
+              cursor: 'nesw-resize',
+            },
+          },
+          {
+            id: 'bottom-right',
+            style: {
+              ...resizeHandleStyles,
+              right: '-5px', // Adjust the right position
+              bottom: '-5px', // Adjust the bottom position
+              cursor: 'nwse-resize',
+            },
+          },
         ]
       : [];
 
@@ -201,7 +239,10 @@ export const renderSlideContentNew = ({
         key={contentItem.id}
         sx={{
           ...boxStyles,
-          ...(isSelected && { boxShadow: '0 0 0 2px blue' }), // Optional: Highlight the selected box
+          ...(isSelected && {
+            boxShadow: '0 0 0 4px rgba(0, 123, 255, 0.6)', // Change the box shadow color and spread
+            outline: 'none', // Remove the default outline
+          }),
         }}
         onMouseDown={handleDragMouseDown ? e => handleDragMouseDown(e, contentItem.id) : undefined}
         onDoubleClick={handleDoubleClickOnContent ? () => handleDoubleClickOnContent(contentItem.id) : undefined}

@@ -6,6 +6,8 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
+import BackgroundIcon from '@mui/icons-material/Wallpaper';
+import PreviewIcon from '@mui/icons-material/VisibilityOutlined';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 import { renderSlideContentNew, renderSlideBackground } from './ContentRenderers';
@@ -394,42 +396,66 @@ export const SlideEditor = ({ presentationId }) => {
         </Box>
 
         <Box sx={{ p: 0, display: 'flex', justifyContent: 'normal', alignItems: 'center' }}>
-          <IconButton onClick={() => handleMoveSlide(-1)} disabled={currentSlideIndex === 0}>
-            <ArrowBackIosNewIcon />
-          </IconButton>
-          <IconButton onClick={() => handleMoveSlide(1)} disabled={currentSlideIndex >= slides.length - 1}>
-            <ArrowForwardIosIcon />
-          </IconButton>
-          <IconButton onClick={handleAddSlide}>
-            <AddCircleOutlineIcon />
-          </IconButton>
-          {slides.length > 1 && (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
-              onClick={() => {
-                const slide = slides[currentSlideIndex];
-                if (slide) {
-                  handleDeleteSlide(slide.id);
-                }
-              }}
-              color="error"
+              onClick={() => handleMoveSlide(-1)}
+              disabled={currentSlideIndex === 0}
+              sx={{ color: 'primary.main' }}
             >
-              <DeleteIcon />
+              <ArrowBackIosNewIcon />
             </IconButton>
-          )}
+            <IconButton
+              onClick={() => handleMoveSlide(1)}
+              disabled={currentSlideIndex >= slides.length - 1}
+              sx={{ color: 'primary.main' }}
+            >
+              <ArrowForwardIosIcon />
+            </IconButton>
+            <IconButton onClick={handleAddSlide} sx={{ color: 'primary.main' }}>
+              <AddCircleOutlineIcon />
+            </IconButton>
+            {slides.length > 1 && (
+              <IconButton
+                onClick={() => {
+                  const slide = slides[currentSlideIndex];
+                  if (slide) {
+                    handleDeleteSlide(slide.id);
+                  }
+                }}
+                sx={{ color: 'error.main' }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
+
           {/* Display current page number and total slides */}
           <Typography variant="body1" sx={{ marginX: 2 }}>
             {currentSlideIndex + 1} / {slides.length}
           </Typography>
 
-          <Button onClick={handleOpenBackgroundPicker}>Set Background</Button>
+          <Button
+            onClick={handleOpenBackgroundPicker}
+            sx={{ color: 'primary.main' }}
+            startIcon={<BackgroundIcon />}
+          >
+            Set Background
+          </Button>
+
           <BackgroundPicker
             isOpen={isBackgroundPickerOpen}
             onClose={handleCloseBackgroundPicker}
             onApplyBackground={handleApplyBackground}
           />
-          <Button onClick={handlePreview}>Preview</Button>
-        </Box>
 
+          <Button
+            onClick={handlePreview}
+            sx={{ color: 'primary.main' }}
+            startIcon={<PreviewIcon />}
+          >
+            Preview
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

@@ -1,6 +1,10 @@
 // SlideSidebar.jsx
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, TextField, Slider, MenuItem, FormControlLabel, Switch } from '@mui/material';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
+import ImageIcon from '@mui/icons-material/Image';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import CodeIcon from '@mui/icons-material/Code';
 // Import your context if using context for state management
 import { usePresentations } from './PresentationContext';
 
@@ -276,10 +280,30 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
       boxSizing: 'border-box', // This ensures padding is included in the height calculation
       overflow: 'clip' // This adds scroll inside the box if content exceeds its height
     }}>
-      <Button onClick={() => handleSetElementType('TEXT')}>Text</Button>
-      <Button onClick={() => handleSetElementType('IMAGE')}>Image</Button>
-      <Button onClick={() => handleSetElementType('VIDEO')}>Video</Button>
-      <Button onClick={() => handleSetElementType('CODE')}>Code</Button>
+      <Button
+        onClick={() => handleSetElementType('TEXT')}
+        startIcon={<TextFieldsIcon />}
+      >
+        Text
+      </Button>
+      <Button
+        onClick={() => handleSetElementType('IMAGE')}
+        startIcon={<ImageIcon />}
+      >
+        Image
+      </Button>
+      <Button
+        onClick={() => handleSetElementType('VIDEO')}
+        startIcon={<VideocamIcon />}
+      >
+        Video
+      </Button>
+      <Button
+        onClick={() => handleSetElementType('CODE')}
+        startIcon={<CodeIcon />}
+      >
+        Code
+      </Button>
       {showPropertiesInput && (
         <>
           {renderPropertiesInput()}
