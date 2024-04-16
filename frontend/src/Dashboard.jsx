@@ -1,9 +1,9 @@
 // Dashboard.jsx
 import React, { useState } from 'react';
 import { Box, Grid, Card, CardContent, CardMedia, Typography, Button, Modal, TextField, Fab } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add'; // Ensure this is imported for the FAB icon
+import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-import { usePresentations } from './PresentationContext'; // Ensure correct path
+import { usePresentations } from './PresentationContext';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -15,16 +15,14 @@ export const Dashboard = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  // Use the PresentationContext
   const { presentations, addPresentation } = usePresentations();
 
   const handleCreatePresentation = async () => {
-    // Adapt this logic to match your context's method signature
+    // use addPresentation in presentationcontext
     await addPresentation({
       name: newPresentationName,
       description: newPresentationDescription,
       thumbnail: newPresentationThumbnailUrl,
-      // Include other necessary presentation details
     });
     setNewPresentationName('');
     handleClose();
@@ -38,8 +36,8 @@ export const Dashboard = () => {
         {presentations.map((presentation) => (
         <Grid item xs={12} sm={8} md={6} lg={4} key={presentation.id} onClick={() => navigate(`/presentation/${presentation.id}/edit/1`)}>
           <Card sx={{
-            width: 300, // Fixed width
-            height: 150, // Height is half of width, maintaining a 2:1 ratio
+            width: '95%', // Take the width of the grid column
+            aspectRatio: '2 / 1', // Maintains a 2:1 aspect ratio for requirement
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -57,21 +55,20 @@ export const Dashboard = () => {
                     component="img"
                     image={presentation.thumbnail}
                     alt="presentation thumbnail"
-                    sx={{ height: '50%', backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing
+                    sx={{ height: '50%', backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing base on requirement
                   />
                   )
                 : (
-                  <Box sx={{ flex: '1 0 50%', bgcolor: 'grey' }} /> // Grey square if empty
+                  <Box sx={{ height: '50%', bgcolor: 'grey' }} /> // Grey square if empty
                   )
               }
               <CardContent sx={{ p: 1 }}>
                 <Typography gutterBottom variant="h5" component="div">
                   {presentation.name}
                 </Typography>
-                {/* Use Box as a flex container for description and slide count */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-                    {presentation.description || 'No description'} {/* Provide a fallback if no description */}
+                    {presentation.description || 'No description'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
                     Slides: {presentation.slides ? presentation.slides.length : 0}
@@ -104,8 +101,8 @@ export const Dashboard = () => {
           borderRadius: 2,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2, // Consistent spacing between elements
-          minWidth: 300, // Minimum width for the modal
+          gap: 2,
+          minWidth: 300,
         }}>
           <Typography id="create-presentation-modal-title" variant="h6" component="h2">
             Create New Presentation

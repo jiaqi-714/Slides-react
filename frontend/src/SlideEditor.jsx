@@ -286,7 +286,6 @@ export const SlideEditor = ({ presentationId }) => {
     if (slides.length > 0) {
       const slideId = slides[currentSlideIndex].id;
       await deleteContentFromSlide(presentationId, slideId, contentId); // Assuming deleteContentFromSlide is implemented
-      // Additional logic to trigger a re-render/update the state as necessary
     }
   };
 
@@ -298,7 +297,6 @@ export const SlideEditor = ({ presentationId }) => {
       resizingRef.current = false;
       draggingRef.current = false; // Reset dragging status using ref
       console.log(e.clientX, e.clientY)
-      // console.log("hhhhhhhhhhhhhhhh")
     }
   };
 
@@ -357,14 +355,14 @@ export const SlideEditor = ({ presentationId }) => {
         setEditingContent={setEditingContent}
         currentSlideIndex={currentSlideIndex}
         presentation={presentation}
-        sx={{ width: '220px', flexShrink: 0 }} // Add this line to set the width
+        sx={{ width: '220px', flexShrink: 0 }}
       />
       <Box sx={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', // Center children horizontally in the column direction
-        justifyContent: 'center', // Center children vertically
+        alignItems: 'center',
+        justifyContent: 'center',
       }}>
 
         <Box
@@ -382,13 +380,13 @@ export const SlideEditor = ({ presentationId }) => {
           onClick={handleDeckClick}
         >
           {renderSlideContentNew({
-            slides, // Replace with your slides data array
-            currentSlideIndex, // Replace with the index of the current slide
-            selectedContentRef, // Replace with your ref object for selected content (or omit if using the default)
-            handleDragMouseDown, // Replace with your function to handle drag start (or omit if not needed)
-            handleDoubleClickOnContent, // Replace with your function to handle double-click (or omit if not needed)
-            handleContextMenu, // Replace with your function to handle context menu (or omit if not needed)
-            handleResizeMouseDown, // Replace with your function to handle resize start (or omit if not needed)
+            slides,
+            currentSlideIndex,
+            selectedContentRef,
+            handleDragMouseDown,
+            handleDoubleClickOnContent,
+            handleContextMenu,
+            handleResizeMouseDown,
           })}
         </Box>
 

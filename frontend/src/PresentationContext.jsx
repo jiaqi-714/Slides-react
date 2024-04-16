@@ -26,7 +26,7 @@ export const PresentationProvider = ({ children }) => {
           });
           if (response.ok) {
             const data = await response.json();
-            const presentationsArray = data.store.store.presentations || [];
+            const presentationsArray = data.store.presentations || [];
             setPresentations(presentationsArray);
           }
         } catch (error) {
@@ -76,7 +76,7 @@ export const PresentationProvider = ({ children }) => {
       if (presentation.id === presentationId) {
         // Initialize slides as an empty array if it doesn't exist
         const existingSlides = Array.isArray(presentation.slides) ? presentation.slides : [];
-        // Create a new slide object. Customize as needed.
+        // Create a new slide object.
         const newSlide = {
           id: uuidv4(),
           content: [

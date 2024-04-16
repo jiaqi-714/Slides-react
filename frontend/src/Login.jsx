@@ -5,7 +5,7 @@ import config from './config.json';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './AuthContext'; // Make sure the path is correct
 
-export const Login = ({ onLogin }) => {
+export const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,6 +24,34 @@ export const Login = ({ onLogin }) => {
     e.preventDefault();
     // Implement login logic here
     onLogin(email, password, setOpenSnackbar, setSnackbarMessage, navigate, login);
+  };
+
+  const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessage, navigate, login) => {
+    try {
+      const backendURL = `http://localhost:${config.BACKEND_PORT}/admin/auth/login`; // Use the port from config
+      const response = await fetch(backendURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.log(errorResponse)
+        const errorMessage = errorResponse.error || 'Login failed';
+        throw new Error(errorMessage);
+      }
+      const { token } = await response.json();
+      localStorage.setItem('token', token);
+      login(token); // Update the AuthContext state
+      navigate('/dashboard'); // Redirect to Dashboard
+    } catch (error) {
+      console.error(error);
+      setSnackbarMessage(error.message || 'Login failed');
+      setOpenSnackbar(true);
+    }
   };
 
   return (
@@ -79,34 +107,6 @@ export const Login = ({ onLogin }) => {
 
     </Container>
   );
-};
-
-export const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessage, navigate, login) => {
-  try {
-    const backendURL = `http://localhost:${config.BACKEND_PORT}/admin/auth/login`; // Use the port from config
-    const response = await fetch(backendURL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      console.log(errorResponse)
-      const errorMessage = errorResponse.error || 'Login failed';
-      throw new Error(errorMessage);
-    }
-    const { token } = await response.json();
-    localStorage.setItem('token', token);
-    login(token); // Update the AuthContext state
-    navigate('/dashboard'); // Redirect to Dashboard
-  } catch (error) {
-    console.error(error);
-    setSnackbarMessage(error.message || 'Login failed');
-    setOpenSnackbar(true);
-  }
 };
 
 export function LoginNav () {

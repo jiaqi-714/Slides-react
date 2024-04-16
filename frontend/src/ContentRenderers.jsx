@@ -1,7 +1,7 @@
-// ContentRenderers.js
+// ContentRenderers.jsx
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import CodeBlock from './CodeBlock'; // Adjust path as necessary
+import CodeBlock from './CodeBlock';
 import config from './config.json';
 
 const deckWidth = config.deckWidth
@@ -13,7 +13,7 @@ export const renderTextContent = (contentItem) => (
     sx={{
       fontSize: `${contentItem.properties.fontSize}em`,
       color: contentItem.properties.color,
-      fontFamily: contentItem.properties.fontFamily, // Apply the selected font family
+      fontFamily: contentItem.properties.fontFamily,
     }}
   >
     {contentItem.properties.text}
@@ -53,7 +53,7 @@ export const renderCodeContent = (contentItem, contentStyles) => {
   return <CodeBlock code={contentItem.properties.code} style={contentStyles} />;
 };
 
-// Function to construct the video source URL, including autoplay parameters if necessary
+// Function to construct the video source URL, including autoplay parameters
 const constructVideoSrc = (videoUrl, autoplay) => {
   const videoId = extractYouTubeVideoID(videoUrl);
   const baseUrl = `https://www.youtube.com/embed/${videoId}`;
@@ -68,6 +68,7 @@ const extractYouTubeVideoID = (videoUrl) => {
   return matches ? matches[1] : null;
 };
 
+// Render the background color, return a CSS background color
 export const renderSlideBackground = (slides, currentSlideIndex) => {
   const currentSlide = slides[currentSlideIndex];
   if (!currentSlide) return {};
@@ -86,8 +87,8 @@ export const renderSlideBackground = (slides, currentSlideIndex) => {
 // Function to dynamically adjust the image size upon loading
 const handleImageLoad = (event, contentItem) => {
   const imageSizeRatio = contentItem.properties.size / 100;
-  const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio; // Adjust calculation as needed
-  const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio; // Adjust calculation as needed
+  const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio;
+  const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio;
   event.target.style.width = `${displayedWidth}px`;
   event.target.style.height = `${displayedHeight}px`;
 };
@@ -95,8 +96,8 @@ const handleImageLoad = (event, contentItem) => {
 // Function to dynamically adjust the video size upon loading (assuming iframe loading)
 const handleVideoLoad = (event, contentItem) => {
   const sizeRatio = 0.95;
-  const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio; // Adjust calculation as needed
-  const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio; // Adjust calculation as needed
+  const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio;
+  const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio;
   event.target.style.width = `${displayedWidth}px`;
   event.target.style.height = `${displayedHeight}px`;
 };
@@ -104,7 +105,7 @@ const handleVideoLoad = (event, contentItem) => {
 export const renderSlideContentNew = ({
   slides,
   currentSlideIndex,
-  selectedContentRef = { current: null }, // Default to an object with null current if not provided
+  selectedContentRef = { current: null }, // Default to an object with null if not provided, used for slide preview
   handleDragMouseDown = null,
   handleDoubleClickOnContent = null,
   handleContextMenu = null,
@@ -156,8 +157,8 @@ export const renderSlideContentNew = ({
 
     if (contentItem.type === 'IMAGE') {
       const imageSizeRatio = contentItem.properties.size / 100;
-      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio; // Adjust calculation as needed
-      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio; // Adjust calculation as needed
+      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio;
+      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio;
       contentStyles = {
         display: 'block',
         width: `${displayedWidth}px` || 'auto',
@@ -165,8 +166,8 @@ export const renderSlideContentNew = ({
       };
     } else if (contentItem.type === 'VIDEO') {
       const sizeRatio = 0.95;
-      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio; // Adjust calculation as needed
-      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio; // Adjust calculation as needed
+      const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio;
+      const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio;
       contentStyles = {
         aspectRatio: '16 / 9',
         width: `${displayedWidth}px` || 'auto',
@@ -175,8 +176,8 @@ export const renderSlideContentNew = ({
     } else if (contentItem.type === 'CODE') {
       contentStyles = {
         ...contentStyles,
-        whiteSpace: 'pre-wrap', // Preserve whitespaces and line breaks
-        background: '#f5f5f5', // Example background color
+        whiteSpace: 'pre-wrap',
+        background: '#f5f5f5',
         borderRadius: '5px',
       };
     }
@@ -186,10 +187,10 @@ export const renderSlideContentNew = ({
     // Define the styles for resize handles
     const resizeHandleStyles = {
       position: 'absolute',
-      width: '10px', // Increase the width
-      height: '10px', // Increase the height
-      backgroundColor: 'transparent', // Make the background transparent
-      borderRadius: '50%', // Make the resize handles circular
+      width: '10px', // width of resize handler
+      height: '10px', // height of resize handler
+      backgroundColor: 'transparent',
+      borderRadius: '0%', // Make the resize handles rantangle
       border: '2px solid #007bff', // Add a blue border
     };
 
@@ -199,8 +200,8 @@ export const renderSlideContentNew = ({
             id: 'top-left',
             style: {
               ...resizeHandleStyles,
-              left: '-5px', // Adjust the left position
-              top: '-5px', // Adjust the top position
+              left: '-5px',
+              top: '-5px',
               cursor: 'nwse-resize',
             },
           },
@@ -208,8 +209,8 @@ export const renderSlideContentNew = ({
             id: 'top-right',
             style: {
               ...resizeHandleStyles,
-              right: '-5px', // Adjust the right position
-              top: '-5px', // Adjust the top position
+              right: '-5px',
+              top: '-5px',
               cursor: 'nesw-resize',
             },
           },
@@ -217,8 +218,8 @@ export const renderSlideContentNew = ({
             id: 'bottom-left',
             style: {
               ...resizeHandleStyles,
-              left: '-5px', // Adjust the left position
-              bottom: '-5px', // Adjust the bottom position
+              left: '-5px',
+              bottom: '-5px',
               cursor: 'nesw-resize',
             },
           },
@@ -226,8 +227,8 @@ export const renderSlideContentNew = ({
             id: 'bottom-right',
             style: {
               ...resizeHandleStyles,
-              right: '-5px', // Adjust the right position
-              bottom: '-5px', // Adjust the bottom position
+              right: '-5px',
+              bottom: '-5px',
               cursor: 'nwse-resize',
             },
           },
@@ -240,8 +241,7 @@ export const renderSlideContentNew = ({
         sx={{
           ...boxStyles,
           ...(isSelected && {
-            boxShadow: '0 0 0 4px rgba(0, 123, 255, 0.6)', // Change the box shadow color and spread
-            outline: 'none', // Remove the default outline
+            boxShadow: '0 0 0 2px rgba(0, 123, 255, 0.6)', // Change the box shadow color and spread
           }),
         }}
         onMouseDown={handleDragMouseDown ? e => handleDragMouseDown(e, contentItem.id) : undefined}

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react'; // Use useRef instead of React.createRef for functional components
+// CodeBlock.jsx
+import React, { useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/github.css'; // Example style
+import 'highlight.js/styles/github.css';
 
 const CodeBlock = ({ code, language, style }) => {
   const ref = useRef(null);

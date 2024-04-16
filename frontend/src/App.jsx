@@ -1,17 +1,17 @@
 // App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Login, onLogin, LoginNav } from './Login';
+import { Login, LoginNav } from './Login';
 import { Register } from './Register';
 import { Dashboard } from './Dashboard';
-import { AuthProvider } from './AuthContext'; // Import the AuthProvider
-import CenteredLayout from './CenteredLayout'; // Import the layout component
-import { EditPresentation } from './EditPresentation'; // Import the edit component
-import ProtectedRoute from './ProtectedRoute'; // Import ProtectedRoute
-import { PresentationProvider } from './PresentationContext'; // Adjust the path as necessary
+import { AuthProvider } from './AuthContext';
+import CenteredLayout from './CenteredLayout';
+import { EditPresentation } from './EditPresentation';
+import ProtectedRoute from './ProtectedRoute';
+import { PresentationProvider } from './PresentationContext';
 import MainLayout from './MainLayout'
 import { NavBar } from './NavBar';
-import PreviewPresentation from './PreviewPresentation'; // Adjust the path as necessary
+import PreviewPresentation from './PreviewPresentation';
 
 function App () {
   return (
@@ -21,7 +21,7 @@ function App () {
           <Routes>
             <Route path="/" element={
               <CenteredLayout>
-                <Login onLogin={onLogin}/>
+                <Login/>
                 <LoginNav />
               </CenteredLayout>
             } />
@@ -33,7 +33,7 @@ function App () {
             } />
             <Route path="/login" element={
               <CenteredLayout>
-                <Login onLogin={onLogin}/>
+                <Login />
                 <LoginNav />
               </CenteredLayout>
             } />
