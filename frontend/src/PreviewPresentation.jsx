@@ -9,7 +9,7 @@ import { renderSlideContentNew, renderSlideBackground } from './ContentRenderers
 import config from './config.json';
 
 const PreviewPresentation = () => {
-  const { presentationId, slideNumber } = useParams(); // Assuming your route is defined with :presentationId/:slideNumber
+  const { presentationId, slideNumber } = useParams(); // Route is defined with :presentationId/:slideNumber
   const { presentations } = usePresentations();
   const presentation = presentations.find(p => p.id === presentationId);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -64,15 +64,15 @@ const PreviewPresentation = () => {
       >
         <Box
           sx={{
-            ...renderSlideBackground(presentation.slides, currentSlideIndex), // Apply background style
+            ...renderSlideBackground(presentation.slides, currentSlideIndex),
             width: '100%',
             height: '100%',
             border: '2px dashed #ccc',
           }}
         >
           {renderSlideContentNew({
-            slides: presentation.slides, // Replace with your slides data array
-            currentSlideIndex, // Replace with the index of the current slide
+            slides: presentation.slides,
+            currentSlideIndex,
             preview: true,
           })}
         </Box>

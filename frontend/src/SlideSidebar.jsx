@@ -89,6 +89,8 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           label="Text"
           variant="outlined"
           fullWidth
+          multiline
+          rows={6}
           margin="normal"
           value={contentProperties.text}
           onChange={(e) => handleChange('text', e.target.value)}
@@ -192,7 +194,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
           variant="outlined"
           fullWidth
           multiline
-          rows={4}
+          rows={6}
           margin="normal"
           value={contentProperties.code}
           onChange={(e) => handleChange('code', e.target.value)}
@@ -284,11 +286,6 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
   return (
     <Box sx={{
       ...sx,
-      p: 1,
-      paddingRight: 2,
-      borderRight: '1px solid #ccc',
-      boxSizing: 'border-box', // This ensures padding is included in the height calculation
-      overflow: 'clip' // This adds scroll inside the box if content exceeds its height
     }}>
       <Button
         onClick={() => handleSetElementType('TEXT')}

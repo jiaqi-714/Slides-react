@@ -44,7 +44,7 @@ export const EditPresentation = () => {
       description: newDescription,
       thumbnail: newThumbnail
     });
-    setEditTitleOpen(false); // Assuming this is the state controlling the modal visibility
+    setEditTitleOpen(false);
   };
 
   const handleBack = () => {

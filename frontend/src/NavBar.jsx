@@ -34,13 +34,13 @@ export const NavBar = ({ presentationControls }) => {
       }}
     >
       <Box sx={{ overflow: 'auto' }}>
+        {/* If in presentation page */}
         {presentationControls
           ? (
             <>
               <Typography variant="h6" sx={{ p: 2 }}>{presentationControls.title}</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
                 {presentationControls.actions.map((action, index) => (
-                  // Wrap Button with ListItem to maintain list item styling
                   <ListItem button key={index} onClick={action.onClick} sx={{ justifyContent: 'flex-start' }}>
                     <ListItemText primary={action.label} />
                   </ListItem>
@@ -49,6 +49,7 @@ export const NavBar = ({ presentationControls }) => {
             <Divider />
             </>
             )
+          // If in dashborad page
           : (
             <List>
             <ListItem button key="Dashboard">
@@ -56,12 +57,10 @@ export const NavBar = ({ presentationControls }) => {
                 <ListItemText primary="Dashboard" />
               </StyledLink>
             </ListItem>
-            {/* Other navigation items here */}
             <Divider />
             </List>
             )}
         <List>
-          {/* Maintain consistency in list item styling for Logout */}
           <ListItem button key="Logout" onClick={handleLogout}>
             <ListItemText primary="Logout" />
           </ListItem>

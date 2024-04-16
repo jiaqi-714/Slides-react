@@ -1,7 +1,6 @@
 // Register.jsx
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
-// import { useNavigate } from 'react-router-dom';
 import config from './config.json';
 
 export const Register = () => {
@@ -12,7 +11,6 @@ export const Register = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('error'); // Default to 'error'
-  // const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

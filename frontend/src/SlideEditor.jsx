@@ -11,11 +11,11 @@ import PreviewIcon from '@mui/icons-material/VisibilityOutlined';
 import { usePresentations } from './PresentationContext';
 import SlideSidebar from './SlideSidebar';
 import { renderSlideContentNew, renderSlideBackground } from './ContentRenderers';
-import BackgroundPicker from './BackgroundPicker'; // Adjust path as needed
+import BackgroundPicker from './BackgroundPicker';
 import config from './config.json';
 
-const deckWidth = config.deckWidth; // Assuming fixed width for now, but you can dynamically determine this
-const deckHeight = config.deckHeight; // Assuming fixed height for now
+const deckWidth = config.deckWidth;
+const deckHeight = config.deckHeight;
 
 export const SlideEditor = ({ presentationId }) => {
   // console.log("render SlideEditor")
@@ -241,7 +241,7 @@ export const SlideEditor = ({ presentationId }) => {
           newHeight = Math.max(originalSizeRef.current.height - dyPercentage, 1);
 
           // Adjust the X and Y position to move in accordance with the size adjustments
-          // As we're reducing the width/height (by dragging towards the top-left), we need to move the position left/upwards
+          // As reducing the width/height (by dragging towards the top-left), we need to move the position left/upwards
           newX = originalPositionRef.current.x + (originalSizeRef.current.width - newWidth);
           newY = originalPositionRef.current.y + (originalSizeRef.current.height - newHeight);
           break;
@@ -282,7 +282,6 @@ export const SlideEditor = ({ presentationId }) => {
 
   const handleDeleteContent = async (contentId) => {
     // Logic to delete content by ID from the current slide
-    // This might involve finding the current slide, filtering out the content by ID, and then updating the slide's content
     if (slides.length > 0) {
       const slideId = slides[currentSlideIndex].id;
       await deleteContentFromSlide(presentationId, slideId, contentId); // Assuming deleteContentFromSlide is implemented
@@ -355,7 +354,15 @@ export const SlideEditor = ({ presentationId }) => {
         setEditingContent={setEditingContent}
         currentSlideIndex={currentSlideIndex}
         presentation={presentation}
-        sx={{ width: '220px', flexShrink: 0 }}
+        sx={{
+          width: '250px',
+          flexShrink: 0,
+          p: 1,
+          paddingRight: 2,
+          borderRight: '1px solid #ccc',
+          boxSizing: 'border-box', // This ensures padding is included in the height calculation
+          overflow: 'clip'
+        }}
       />
       <Box sx={{
         flex: 1,
@@ -455,5 +462,3 @@ export const SlideEditor = ({ presentationId }) => {
     </Box>
   );
 };
-
-// export default SlideEditor;

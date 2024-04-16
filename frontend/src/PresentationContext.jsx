@@ -27,6 +27,7 @@ export const PresentationProvider = ({ children }) => {
           if (response.ok) {
             const data = await response.json();
             const presentationsArray = data.store.presentations || [];
+            console.log('fetch result: ', presentationsArray)
             setPresentations(presentationsArray);
           }
         } catch (error) {
@@ -137,7 +138,6 @@ export const PresentationProvider = ({ children }) => {
       },
       body: JSON.stringify({ store: { presentations: updatedPresentations } }),
     });
-    // Optionally, you can log or handle the response here
   };
 
   const deleteSlide = async (presentationId, slideId) => {
@@ -221,13 +221,12 @@ export const PresentationProvider = ({ children }) => {
             const updatedContent = slide.content.map(contentPiece => {
               if (contentPiece.id === contentId) {
                 // Here, spread the existing content piece, then spread the updates over it
-                // This allows for 'type' and 'properties' (and potentially other fields) to be updated
                 return {
                   ...contentPiece,
                   ...updates,
                   properties: {
                     ...contentPiece.properties,
-                    // Ensure that new properties from updates are spread last so they overwrite existing properties
+                    // new properties from updates are spread last so they overwrite existing properties
                     ...updates.properties
                   }
                 };
@@ -277,7 +276,7 @@ export const PresentationProvider = ({ children }) => {
       addSlideToPresentation,
       updatePresentationSlides,
       deleteSlide,
-      addContentToSlide, // Add this line
+      addContentToSlide,
       updateContentOnSlide,
       deleteContentFromSlide,
       updateContentStateOnSlide,

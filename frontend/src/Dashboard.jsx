@@ -32,53 +32,64 @@ export const Dashboard = () => {
     <Box sx={{
       height: '95vh', // Sets the height to fill the viewport
     }}>
-      <Grid container spacing={2}>
-        {presentations.map((presentation) => (
-        <Grid item xs={12} sm={8} md={6} lg={4} key={presentation.id} onClick={() => navigate(`/presentation/${presentation.id}/edit/1`)}>
-          <Card sx={{
-            width: '95%', // Take the width of the grid column
-            aspectRatio: '2 / 1', // Maintains a 2:1 aspect ratio for requirement
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            transition: '0.3s', // Smooth transition for hover effects
-            '&:hover': {
-              bgcolor: 'background.default', // Change background color on hover
-              transform: 'scale(1.05)', // Slightly scale the card
-              boxShadow: '0 6px 12px rgba(0,0,0,0.2)', // Add shadow for depth
-            }
-          }}>
-              {/* Conditional rendering for the thumbnail */}
-              {presentation.thumbnail
-                ? (
-                  <CardMedia
-                    component="img"
-                    image={presentation.thumbnail}
-                    alt="presentation thumbnail"
-                    sx={{ height: '50%', backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing base on requirement
-                  />
-                  )
-                : (
-                  <Box sx={{ height: '50%', bgcolor: 'grey' }} /> // Grey square if empty
-                  )
+
+      {presentations.length > 0
+        ? (
+        <Grid container spacing={2}>
+          {presentations.map((presentation) => (
+          <Grid item xs={12} sm={8} md={6} lg={4} key={presentation.id} onClick={() => navigate(`/presentation/${presentation.id}/edit/1`)}>
+            <Card sx={{
+              width: '95%', // Take the width of the grid column
+              aspectRatio: '2 / 1', // Maintains a 2:1 aspect ratio for requirement
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: '0.3s', // Smooth transition for hover effects
+              '&:hover': {
+                bgcolor: 'background.default', // Change background color on hover
+                transform: 'scale(1.05)', // Slightly scale the card
+                boxShadow: '0 6px 12px rgba(0,0,0,0.2)', // Add shadow for depth
               }
-              <CardContent sx={{ p: 1 }}>
-                <Typography gutterBottom variant="h5" component="div">
-                  {presentation.name}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-                    {presentation.description || 'No description'}
+            }}>
+                {/* Conditional rendering for the thumbnail */}
+                {presentation.thumbnail
+                  ? (
+                    <CardMedia
+                      component="img"
+                      image={presentation.thumbnail}
+                      alt="presentation thumbnail"
+                      sx={{ height: '50%', backgroundColor: presentation.thumbnail ? '' : 'grey' }} // Grey background if thumbnail is missing base on requirement
+                    />
+                    )
+                  : (
+                    <Box sx={{ height: '50%', bgcolor: 'grey' }} /> // Grey square if empty
+                    )
+                }
+                <CardContent sx={{ p: 1 }}>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {presentation.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
-                    Slides: {presentation.slides ? presentation.slides.length : 0}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+                      {presentation.description || 'No description'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
+                      Slides: {presentation.slides ? presentation.slides.length : 0}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+          )
+        : (
+      // Display this if there is not presentation avalible
+          <Typography variant="h5" textAlign="center">
+            Create your first presentation use left bottom button!
+          </Typography>
+          )}
+
       <Fab color="primary" aria-label="add" sx={{ position: 'fixed', bottom: 16, right: 16 }} onClick={handleOpen}>
         <AddIcon sx={{ }}/>
       </Fab>
