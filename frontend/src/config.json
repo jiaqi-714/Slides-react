@@ -1,5 +1,6 @@
 {
 	"BACKEND_PORT": 5005,
 	"deckWidth": 960,
-	"deckHeight": 700
+	"deckHeight": 700, 
+	"debug": true
 }

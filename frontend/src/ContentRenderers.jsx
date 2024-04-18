@@ -4,24 +4,49 @@ import { Box, Typography } from '@mui/material';
 import CodeBlock from './CodeBlock';
 import config from './config.json';
 
+const debug = config.debug;
 const deckWidth = config.deckWidth
 const deckHeight = config.deckHeight
 
 // Render Text Content
-export const renderTextContent = (contentItem) => (
-  <Typography
+export const renderTextContent = (contentItem) => {
+  if (debug) {
+    if (!contentItem || !contentItem.properties ||
+      typeof contentItem.properties.fontSize !== 'number') {
+      console.error('Invalid contentItem properties during render slide');
+      return null;
+    }
+  }
+
+  return (
+    <Typography
     sx={{
       fontSize: `${contentItem.properties.fontSize}em`,
       color: contentItem.properties.color,
       fontFamily: contentItem.properties.fontFamily,
     }}
-  >
-    {contentItem.properties.text}
-  </Typography>
-);
+    >
+      {contentItem.properties.text}
+    </Typography>
+  )
+};
 
 // Render Image Content
 export const renderImageContent = (contentItem, handleImageLoad, contentStyles) => {
+  if (debug) {
+    if (!contentItem ||
+      !contentItem.properties ||
+      typeof contentItem.properties.isBase64 !== 'boolean' ||
+      typeof handleImageLoad !== 'function') {
+      console.error('Invalid contentItem properties during render picture');
+      return (
+        <Typography>
+          Error in loading Picture, check renderImageContent function in contentRenderers
+        </Typography>
+      )
+    }
+  }
+
   return (
     <img
       src={contentItem.properties.isBase64 ? `data:image/jpeg;base64,${contentItem.properties.imageUrl}` : contentItem.properties.imageUrl}
@@ -35,6 +60,20 @@ export const renderImageContent = (contentItem, handleImageLoad, contentStyles) 
 
 // Render Video Content
 export const renderVideoContent = (contentItem, handleVideoLoad, contentStyles) => {
+  if (debug) {
+    if (!contentItem ||
+      !contentItem.properties ||
+      typeof contentItem.properties.autoPlay !== 'boolean' ||
+      typeof handleVideoLoad !== 'function') {
+      console.error('Invalid contentItem properties during render Video');
+      return (
+        <Typography>
+          Error in loading Video, check renderVideoContent function in contentRenderers
+        </Typography>
+      )
+    }
+  }
+
   const videoSrc = constructVideoSrc(contentItem.properties.videoUrl, contentItem.properties.autoPlay);
   return (
     <iframe
@@ -70,6 +109,14 @@ const extractYouTubeVideoID = (videoUrl) => {
 
 // Render the background color, return a CSS background color
 export const renderSlideBackground = (slides, currentSlideIndex) => {
+  if (debug) {
+    if (!Array.isArray(slides) ||
+      typeof currentSlideIndex !== 'number') {
+      console.error('Invalid input For renderSlideBackground: slides or currentSlideIndex error');
+      return {};
+    }
+  }
+
   const currentSlide = slides[currentSlideIndex];
   if (!currentSlide) return {};
 
@@ -86,6 +133,16 @@ export const renderSlideBackground = (slides, currentSlideIndex) => {
 
 // Function to dynamically adjust the image size upon loading
 const handleImageLoad = (event, contentItem) => {
+  if (debug) {
+    if (!contentItem ||
+      !contentItem.properties ||
+      typeof contentItem.properties.width !== 'number' ||
+      typeof contentItem.properties.height !== 'number') {
+      console.error('Invalid contentItem properties during render image');
+      return null;
+    }
+  }
+
   const imageSizeRatio = contentItem.properties.size / 100;
   const displayedWidth = deckWidth * (contentItem.properties.width / 100) * imageSizeRatio;
   const displayedHeight = deckHeight * (contentItem.properties.height / 100) * imageSizeRatio;
@@ -95,6 +152,16 @@ const handleImageLoad = (event, contentItem) => {
 
 // Function to dynamically adjust the video size upon loading (assuming iframe loading)
 const handleVideoLoad = (event, contentItem) => {
+  if (debug) {
+    if (!contentItem ||
+      !contentItem.properties ||
+      typeof contentItem.properties.width !== 'number' ||
+      typeof contentItem.properties.height !== 'number') {
+      console.error('Invalid contentItem properties during render video');
+      return null;
+    }
+  }
+
   const sizeRatio = 0.95;
   const displayedWidth = deckWidth * (contentItem.properties.width / 100) * sizeRatio;
   const displayedHeight = deckHeight * (contentItem.properties.height / 100) * sizeRatio;
@@ -241,7 +308,7 @@ export const renderSlideContentNew = ({
         sx={{
           ...boxStyles,
           ...(isSelected && {
-            boxShadow: '0 0 0 2px rgba(0, 123, 255, 0.6)', // Change the box shadow color and spread
+            boxShadow: '0 0 0 2px rgba(0, 123, 0, 0.6)', // Change the box shadow color and spread
           }),
         }}
         onMouseDown={handleDragMouseDown ? e => handleDragMouseDown(e, contentItem.id) : undefined}

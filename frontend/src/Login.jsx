@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
 import config from './config.json';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from './AuthContext'; // Make sure the path is correct
+import { useAuth } from './AuthContext';
+
+const debug = config.debug;
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -27,6 +29,15 @@ export const Login = () => {
   };
 
   const onLogin = async (email, password, setOpenSnackbar, setSnackbarMessage, navigate, login) => {
+    if (debug) {
+      if (typeof email !== 'string' || typeof password !== 'string') {
+        console.error('Invalid email or password input');
+        setSnackbarMessage('Invalid email or password input');
+        setOpenSnackbar(true);
+        return;
+      }
+    }
+
     try {
       const backendURL = `http://localhost:${config.BACKEND_PORT}/admin/auth/login`; // Use the port from config
       const response = await fetch(backendURL, {

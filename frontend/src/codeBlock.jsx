@@ -2,8 +2,15 @@
 import React, { useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
+import PropTypes from 'prop-types';
 
 const CodeBlock = ({ code, language, style }) => {
+  CodeBlock.propTypes = {
+    code: PropTypes.string.isRequired,
+    language: PropTypes.string.isRequired,
+    style: PropTypes.object
+  };
+
   const ref = useRef(null);
 
   useEffect(() => {

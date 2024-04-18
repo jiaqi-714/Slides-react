@@ -1,6 +1,6 @@
 // PresentationContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from './AuthContext'; // Import useAuth from AuthContext
+import { useAuth } from './AuthContext';
 import config from './config.json';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,7 +8,7 @@ const PresentationContext = createContext();
 
 export const usePresentations = () => useContext(PresentationContext);
 
-const backendURL = `http://localhost:${config.BACKEND_PORT}/store`; // Use the port from config
+const backendURL = `http://localhost:${config.BACKEND_PORT}/store`;
 
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);

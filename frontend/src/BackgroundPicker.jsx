@@ -1,6 +1,10 @@
 // BackgroundPicker.js
 import React, { useState } from 'react';
 import { Modal, Box, Typography, Button, TextField, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import PropTypes from 'prop-types';
+import config from './config.json';
+
+const debug = config.debug;
 
 const modalStyle = {
   position: 'absolute',
@@ -15,6 +19,14 @@ const modalStyle = {
 };
 
 const BackgroundPicker = ({ isOpen, onClose, onApplyBackground }) => {
+  if (debug) {
+    BackgroundPicker.propTypes = {
+      isOpen: PropTypes.bool.isRequired,
+      onClose: PropTypes.func.isRequired,
+      onApplyBackground: PropTypes.func.isRequired,
+    };
+  }
+
   const [backgroundType, setBackgroundType] = useState('solid');
   const [applyTo, setApplyTo] = useState('currentSlide');
   const [color1, setColor1] = useState('#FFFFFF');

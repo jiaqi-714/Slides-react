@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Snackbar, Alert } from '@mui/material';
 import config from './config.json';
 
+const debug = config.debug
+
 export const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,6 +28,23 @@ export const Register = () => {
 
   // Updated onRegister function to accept parameters for handling success
   const onRegister = async () => {
+    if (debug) {
+      if (typeof email !== 'string' || typeof password !== 'string') {
+        console.error('Invalid email or password input');
+        setSnackbarSeverity('error');
+        setSnackbarMessage('Invalid email or password input');
+        setOpenSnackbar(true);
+        return;
+      }
+      if (!email.includes('@')) {
+        console.error('Email should contain @');
+        setSnackbarSeverity('error');
+        setSnackbarMessage('Email should contain @');
+        setOpenSnackbar(true);
+        return;
+      }
+    }
+
     try {
       const backendURL = `http://localhost:${config.BACKEND_PORT}/admin/auth/register`;
       const response = await fetch(backendURL, {

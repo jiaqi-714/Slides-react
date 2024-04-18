@@ -26,7 +26,7 @@ const SlideSidebar = ({ editingContent, setEditingContent, currentSlideIndex, pr
     videoUrl: '',
     autoPlay: false,
     code: '',
-    fontFamily: 'Arial, sans-serif', // Assuming you're including the font family adjustment feature
+    fontFamily: 'Arial, sans-serif',
   };
   const [contentProperties, setContentProperties] = useState(defaultContentProperties);
 
