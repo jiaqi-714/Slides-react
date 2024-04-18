@@ -24,6 +24,9 @@ export const renderTextContent = (contentItem) => {
       fontSize: `${contentItem.properties.fontSize}em`,
       color: contentItem.properties.color,
       fontFamily: contentItem.properties.fontFamily,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     }}
     >
       {contentItem.properties.text}
