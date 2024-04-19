@@ -38,7 +38,9 @@ export const NavBar = ({ presentationControls }) => {
         {presentationControls
           ? (
             <>
-              <Typography variant="h6" sx={{ p: 2 }}>{presentationControls.title}</Typography>
+              <Typography variant="h5" sx={{ p: 2 }}>Editing Presentation:</Typography>
+              <Typography variant="h6" sx={{ p: 2, overflow: 'auto', maxHeight: '20%' }}>{presentationControls.title}</Typography>
+              <Divider />
               <Box sx={{ display: 'flex', flexDirection: 'column', p: 0 }}>
                 {presentationControls.actions.map((action, index) => (
                   <ListItem button key={index} onClick={action.onClick} sx={{ justifyContent: 'flex-start' }}>

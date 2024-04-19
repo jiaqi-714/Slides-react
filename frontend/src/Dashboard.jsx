@@ -65,8 +65,20 @@ export const Dashboard = () => {
                     <Box sx={{ height: '50%', bgcolor: 'grey' }} /> // Grey square if empty
                     )
                 }
-                <CardContent sx={{ p: 1 }}>
-                  <Typography gutterBottom variant="h5" component="div">
+                <CardContent sx={{
+                  p: 1,
+                  overflow: 'hidden',
+                  height: '50%',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  flexDirection: 'column'
+                }}>
+                  <Typography gutterBottom variant="h5" component="div"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxHeight: '30%'
+                    }}>
                     {presentation.name}
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

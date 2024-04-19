@@ -53,7 +53,7 @@ export const EditPresentation = () => {
 
   const presentationControls = presentation
     ? {
-        title: `Editing Presentation: ${presentation?.name}`,
+        title: `${presentation?.name}`,
         actions: [
           { label: 'Back', onClick: handleBack },
           { label: 'Edit Title', onClick: handleEditTitleOpen },

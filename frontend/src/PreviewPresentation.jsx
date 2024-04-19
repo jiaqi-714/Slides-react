@@ -1,7 +1,7 @@
 // PreviewPresentation.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { usePresentations } from './PresentationContext';
@@ -78,13 +78,17 @@ const PreviewPresentation = () => {
         </Box>
       </Box>
 
-      <Box sx={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 2 }}>
+      <Box sx={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 2, alignItems: 'center' }}>
         <IconButton onClick={() => handleMoveSlide(-1)} disabled={currentSlideIndex === 0}>
           <ArrowBackIosNewIcon />
         </IconButton>
         <IconButton onClick={() => handleMoveSlide(1)} disabled={currentSlideIndex >= presentation.slides.length - 1}>
           <ArrowForwardIosIcon />
         </IconButton>
+        {/* Display current page number and total slides */}
+        <Typography>
+          {currentSlideIndex + 1} / {presentation.slides.length}
+        </Typography>
       </Box>
     </Box>
   );
