@@ -62,11 +62,6 @@ export const SlideEditor = ({ presentationId }) => {
     }
   }, [currentSlideIndex, isInternalNavigation, navigate, presentationId, slideNumber]);
 
-  // Whenever presentations state updates, keep presentationsRef current
-  useEffect(() => {
-    presentationsRef.current = presentations;
-  }, [presentations]);
-
   const handleAddSlide = async () => {
     await addSlideToPresentation(presentationId);
   };
@@ -151,7 +146,7 @@ export const SlideEditor = ({ presentationId }) => {
       const clampedY = Math.min(Math.max(newYPercentage, 0), maxPossibleY);
 
       // Update position using the clamped values
-      updateContentStateOnSlide(
+      presentationsRef.current = updateContentStateOnSlide(
         presentationId,
         slides[currentSlideIndex].id,
         selectedContentRef.current.id,
@@ -251,7 +246,7 @@ export const SlideEditor = ({ presentationId }) => {
       newX = Math.max(Math.min(newX, 100 - newWidth), 0);
       newY = Math.max(Math.min(newY, 100 - newHeight), 0);
 
-      updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContentRef.current.id, {
+      presentationsRef.current = updateContentStateOnSlide(presentationId, slides[currentSlideIndex].id, selectedContentRef.current.id, {
         properties: {
           width: newWidth,
           height: newHeight,
