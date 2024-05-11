@@ -62,6 +62,11 @@ export const SlideEditor = ({ presentationId }) => {
     }
   }, [currentSlideIndex, isInternalNavigation, navigate, presentationId, slideNumber]);
 
+  // Whenever presentations state updates, keep presentationsRef current
+  useEffect(() => {
+    presentationsRef.current = presentations;
+  }, [presentations]);
+
   const handleAddSlide = async () => {
     await addSlideToPresentation(presentationId);
   };
