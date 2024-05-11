@@ -6,6 +6,9 @@ import { usePresentations } from './PresentationContext'; // Ensure correct path
 import { SlideEditor } from './SlideEditor';
 import MainLayout from './MainLayout';
 import { NavBar } from './NavBar';
+import config from './config.json';
+
+const drawerWidth = config.drawerWidth;
 
 export const EditPresentation = () => {
   const { presentationId } = useParams();
@@ -67,7 +70,7 @@ export const EditPresentation = () => {
   }
 
   return (
-    <MainLayout NavBarComponent={NavBar} navBarProps={{ presentationControls }}>
+    <MainLayout NavBarComponent={NavBar} navBarProps={{ presentationControls }} drawerWidth={drawerWidth} >
       <Box sx={{ margin: 0 }}>
 
         <SlideEditor presentationId={presentationId} />

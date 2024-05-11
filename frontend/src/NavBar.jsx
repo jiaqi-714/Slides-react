@@ -11,7 +11,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
   color: 'inherit',
 }));
 
-export const NavBar = ({ presentationControls }) => {
+export const NavBar = ({ presentationControls, drawerWidth }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -20,9 +20,6 @@ export const NavBar = ({ presentationControls }) => {
     logout();
     navigate('/login');
   };
-
-  // Drawer width
-  const drawerWidth = 180;
 
   return (
     <Drawer

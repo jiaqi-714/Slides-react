@@ -64,6 +64,7 @@ export const SlideEditor = ({ presentationId }) => {
 
   // Whenever presentations state updates, keep presentationsRef current
   useEffect(() => {
+    // console.log('changed');
     presentationsRef.current = presentations;
   }, [presentations]);
 

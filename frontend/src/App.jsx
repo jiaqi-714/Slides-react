@@ -12,6 +12,9 @@ import { PresentationProvider } from './PresentationContext';
 import MainLayout from './MainLayout'
 import { NavBar } from './NavBar';
 import PreviewPresentation from './PreviewPresentation';
+import config from './config.json';
+
+const drawerWidth = config.drawerWidth;
 
 function App () {
   return (
@@ -39,7 +42,7 @@ function App () {
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <MainLayout NavBarComponent={NavBar}>
+                <MainLayout NavBarComponent={NavBar} drawerWidth={drawerWidth} >
                   <Dashboard />
                 </MainLayout>
               </ProtectedRoute>
