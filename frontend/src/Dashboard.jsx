@@ -73,11 +73,11 @@ export const Dashboard = () => {
                   justifyContent: 'space-between',
                   flexDirection: 'column'
                 }}>
-                  <Typography gutterBottom variant="h5" component="div"
+                  <Typography gutterBottom variant="h7" component="div"
                     sx={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      maxHeight: '30%'
+                      maxHeight: '50%'
                     }}>
                     {presentation.name}
                   </Typography>

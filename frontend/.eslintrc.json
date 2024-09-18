@@ -26,9 +26,9 @@
         "semi": 0,
         "comma-dangle": 0,
         "react/prop-types": 0,
-        "no-unused-vars": "off",
-        "quotes": ["error", "single"], 
-        "quote-props": ["error", "as-needed"]
+        "no-unused-vars": "warn",
+        "quotes": ["warn", "single"],
+        "quote-props": ["warn", "as-needed"]
     },
     "settings": {
         "react": {

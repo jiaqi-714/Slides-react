@@ -12,8 +12,8 @@ const backendURL = `http://localhost:${config.BACKEND_PORT}/store`;
 
 const initPre = [
   {
-    name: '123',
-    description: '123',
+    name: '测试',
+    description: 'test',
     thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Taiping_Heavenly_Kingdom_map.svg/1920px-Taiping_Heavenly_Kingdom_map.svg.png',
     id: '3c0db1a0-0962-47a7-abb7-0f8ae4ac3715',
     slides: [

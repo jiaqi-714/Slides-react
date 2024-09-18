@@ -40,7 +40,11 @@ function App () {
                 <LoginNav />
               </CenteredLayout>
             } /> */}
-
+            <Route path="/Slides-react" element={
+              <MainLayout NavBarComponent={NavBar} drawerWidth={drawerWidth} >
+                <Dashboard />
+              </MainLayout>
+            } />
             <Route path="/" element={
               <MainLayout NavBarComponent={NavBar} drawerWidth={drawerWidth} >
                 <Dashboard />
