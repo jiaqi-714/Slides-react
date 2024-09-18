@@ -22,7 +22,7 @@ function App () {
       <PresentationProvider>
         <Router>
           <Routes>
-            <Route path="/" element={
+            {/* <Route path="/" element={
               <CenteredLayout>
                 <Login/>
                 <LoginNav />
@@ -39,33 +39,29 @@ function App () {
                 <Login />
                 <LoginNav />
               </CenteredLayout>
+            } /> */}
+
+            <Route path="/" element={
+              <MainLayout NavBarComponent={NavBar} drawerWidth={drawerWidth} >
+                <Dashboard />
+              </MainLayout>
             } />
             <Route path="/dashboard" element={
-              <ProtectedRoute>
                 <MainLayout NavBarComponent={NavBar} drawerWidth={drawerWidth} >
                   <Dashboard />
                 </MainLayout>
-              </ProtectedRoute>
             } />
             <Route path="/presentation/:presentationId/edit/" element={
-              <ProtectedRoute>
                 <EditPresentation />
-              </ProtectedRoute>
             } />
             <Route path="/presentation/:presentationId/edit/:slideNumber" element={
-              <ProtectedRoute>
                 <EditPresentation />
-              </ProtectedRoute>
             } />
             <Route path="/presentation/:presentationId/preview/" element={
-              <ProtectedRoute>
                 <PreviewPresentation />
-              </ProtectedRoute>
             } />
             <Route path="/presentation/:presentationId/preview/:slideNumber" element={
-              <ProtectedRoute>
                 <PreviewPresentation />
-              </ProtectedRoute>
             } />
           </Routes>
         </Router>
