@@ -10,40 +10,83 @@ export const usePresentations = () => useContext(PresentationContext);
 
 const backendURL = `http://localhost:${config.BACKEND_PORT}/store`;
 
+const initPre = [
+  {
+    name: '123',
+    description: '123',
+    thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Taiping_Heavenly_Kingdom_map.svg/1920px-Taiping_Heavenly_Kingdom_map.svg.png',
+    id: '3c0db1a0-0962-47a7-abb7-0f8ae4ac3715',
+    slides: [
+      {
+        id: '5e64aeb9-e3ab-4c06-9cfd-fc695e77e705',
+        content: [
+          {
+            type: 'TEXT',
+            properties: {
+              position: {
+                x: 38.02083333333333,
+                y: 36.857142857142854
+              },
+              size: 50,
+              width: 25.625,
+              height: 25.625,
+              text: 'New Slide',
+              fontSize: 2.6,
+              color: '#000000',
+              imageUrl: '',
+              imageAlt: '',
+              isBase64: false,
+              videoUrl: '',
+              autoPlay: false,
+              code: '',
+              fontFamily: '\'Times New Roman\', serif'
+            },
+            id: '11b0a1b1-c865-4e51-ad4d-ae2f14f06017',
+            layer: 0
+          }
+        ],
+        backgroundColor: '#ffffff'
+      }
+    ]
+  }
+]
+
 export const PresentationProvider = ({ children }) => {
   const [presentations, setPresentations] = useState([]);
   const { isAuthenticated } = useAuth(); // Use the useAuth hook to access authentication state
 
   useEffect(() => {
+    setPresentations(initPre);
+    console.log('load')
     // Function to fetch presentations
-    const fetchPresentations = async () => {
-      // Fetch presentations only if the user is authenticated
-      if (isAuthenticated) {
-        try {
-          const response = await fetch(backendURL, {
-            method: 'GET',
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            const presentationsArray = data.store.presentations || [];
-            console.log('fetch result: ', presentationsArray)
-            setPresentations(presentationsArray);
-          }
-        } catch (error) {
-          console.error('Failed to fetch presentations', error);
-        }
-      }
-    };
-    fetchPresentations();
-  }, [isAuthenticated]); // Re-run this effect when isAuthenticated changes
+    // const fetchPresentations = async () => {
+    //   // Fetch presentations only if the user is authenticated
+    //   if (isAuthenticated) {
+    //     try {
+    //       const response = await fetch(backendURL, {
+    //         method: 'GET',
+    //         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    //       });
+    //       if (response.ok) {
+    //         const data = await response.json();
+    //         const presentationsArray = data.store.presentations || [];
+    //         console.log('fetch result: ', presentationsArray)
+    //         setPresentations(initPre);
+    //       }
+    //     } catch (error) {
+    //       console.error('Failed to fetch presentations', error);
+    //     }
+    //   }
+    // };
+    // fetchPresentations();
+  }, []); // Re-run this effect when isAuthenticated changes
 
   // Reset presentations when user logs out
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setPresentations([]); // Clear presentations if not authenticated
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     setPresentations([]); // Clear presentations if not authenticated
+  //   }
+  // }, [isAuthenticated]);
 
   const addPresentation = async (newPresentation) => {
     const presentationWithId = {
@@ -100,7 +143,7 @@ export const PresentationProvider = ({ children }) => {
                 videoUrl: '',
                 autoPlay: false,
                 code: '',
-                fontFamily: "'Times New Roman', serif"
+                fontFamily: '\'Times New Roman\', serif'
               },
               id: '11b0a1b1-c865-4e51-ad4d-ae2f14f06017',
               layer: 0

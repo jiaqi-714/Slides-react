@@ -59,11 +59,6 @@ export const NavBar = ({ presentationControls, drawerWidth }) => {
             <Divider />
             </List>
             )}
-        <List>
-          <ListItem button key="Logout" onClick={handleLogout}>
-            <ListItemText primary="Logout" />
-          </ListItem>
-        </List>
       </Box>
     </Drawer>
   );
